@@ -1,0 +1,11 @@
+# obtain the base Linux image with Java runtime
+FROM eclipse-temurin:21-jre-jammy
+
+# Place java executable at /usr/app
+COPY ./target/VectorServiceOPE-0.1.0-jar-with-dependencies.jar /usr/app/
+
+# The listening port
+EXPOSE 2060
+
+# Starts the VectorService service
+CMD ["java","-jar","/usr/app/VectorServiceOPE-0.1.0-jar-with-dependencies.jar"]
