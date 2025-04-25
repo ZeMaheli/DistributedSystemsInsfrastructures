@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>pt.isel.meic.iesd</groupId>
+    <artifactId>TransactionManager</artifactId>
+    <packaging>pom</packaging>
+    <name>${module.type} TransactionManager</name>
+    <version>0.1.0</version>
+
+    <properties>
+        <module.type>SERVICE ::</module.type>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Java version related -->
+        <java.version>21</java.version>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        
+        <maven-compiler-plugin>3.14.0</maven-compiler-plugin>
+        <exec-maven-plugin>3.5.0</exec-maven-plugin>
+        <jakarta.xml.ws-api>4.0.2</jakarta.xml.ws-api>
+        <jaxws-rt>4.0.3</jaxws-rt>
+        <maven-surefire-plugin>3.5.2</maven-surefire-plugin>
+        <jib-maven-plugin>3.4.5</jib-maven-plugin>
+        <junit-bom>5.12.0</junit-bom>
+    </properties>
+
+    <modules>
+        <module>TransactionManagerAPIM</module>
+        <module>TransactionManagerOPE</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>jakarta.xml.ws</groupId>
+                <artifactId>jakarta.xml.ws-api</artifactId>
+                <version>${jakarta.xml.ws-api}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>jaxws-rt</artifactId>
+                <version>${jaxws-rt}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-bom}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit-bom}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit-bom}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit-bom}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit-bom}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+    <build>
+        <!-- To use the plugin goals in your POM or parent POM -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <maxmem>256M</maxmem>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
