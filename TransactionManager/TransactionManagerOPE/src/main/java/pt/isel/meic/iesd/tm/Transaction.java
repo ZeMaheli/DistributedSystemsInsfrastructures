@@ -1,22 +1,30 @@
 package pt.isel.meic.iesd.tm;
 
-import jakarta.jws.WebService;
+import java.util.ArrayList;
 
-@WebService(endpointInterface = "pt.isel.meic.iesd.transactionmanager.ITransaction")
-public class Transaction implements ITransaction {
+public class Transaction {
+    private final Integer ID;
+    private TransactionState state;
+    private final ArrayList<Resource> resources = new ArrayList<>();
 
-    @Override
-    public int begin() {
-        return 0;
+    public Transaction(Integer ID) {
+        this.ID = ID;
+        this.state = TransactionState.STARTED;
     }
 
-    @Override
-    public String commit(int transactionID) {
-        return "";
+    public Integer getID() {
+        return ID;
     }
 
-    @Override
-    public String rollback(int transactionID) {
-        return "";
+    public TransactionState getState() {
+        return state;
+    }
+
+    public void addResourceManager(Resource resource) {
+        resources.add(resource);
+    }
+
+    public void removeResourceManager(Resource resource) {
+        resources.remove(resource);
     }
 }

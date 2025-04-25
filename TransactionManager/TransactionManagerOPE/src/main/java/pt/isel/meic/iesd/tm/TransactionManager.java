@@ -1,29 +1,40 @@
 package pt.isel.meic.iesd.tm;
 
-import jakarta.xml.ws.Endpoint;
+import jakarta.jws.WebService;
 
-public class TransactionManager {
-    static final String HOSTNAME = "0.0.0.0"; 
-    static final Integer PORT = 2059;
+@WebService(endpointInterface = "pt.isel.meic.iesd.tm.ITransaction")
+public class TransactionManager implements ITransaction {
+    private final TransactionRepository transactionRepository;
 
-    public static int main(String[] args) {
-        String hostname = HOSTNAME;
-        int port = PORT;
-        switch (args.length) {
-            case 2:
-                try {
-                    port = Integer.parseInt(args[1]);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid parameter PORT");
-                    return ExitCode.INVALID_PORT.value();
-                }
-            case 1:
-                hostname = args[0];
-        }
+    public TransactionManager(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
+    }
 
-        Endpoint ep = Endpoint.create(new Transaction());
-        System.out.println("Starting TransactionManager...");
-        ep.publish("http://" + hostname + ":" + port + "/Transaction");
-        return 0;
+    @Override
+    public int begin() {
+        Transaction newTransaction = transactionRepository.newTransaction();
+        int id = newTransaction.getID();
+        String state = newTransaction.getState().name();
+        // TODO: Store on a zk node the transaction state ID -> Started
+        return newTransaction.getID();
+    }
+
+    @Override
+    public String commit(int transactionID) {
+        // TODO: Ask all parties involved to prepare to commit
+        // If every response is ready commit
+        // Else ask for rollback
+        // TODO: Ask all parties to commit
+        // If every response is commited then close
+        // Else ask for rollback
+        // Return result
+        // Result should be a value that represents the resulting state
+        return "";
+    }
+
+    @Override
+    public String rollback(int transactionID) {
+        // TODO: Ask all parties involved to rollback
+        return "";
     }
 }

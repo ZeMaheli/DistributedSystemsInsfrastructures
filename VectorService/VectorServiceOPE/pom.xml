@@ -27,6 +27,11 @@
             <artifactId>VectorServiceAPIM</artifactId>
             <version>0.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>pt.isel.meic.iesd.tm</groupId>
+            <artifactId>TransactionManagerAPIM</artifactId>
+            <version>0.1.0</version>
+        </dependency>
 
         <dependency>
             <groupId>jakarta.xml.ws</groupId>

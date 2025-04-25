@@ -18,7 +18,7 @@
     <properties>
         <module.type>SERVICE.OPE ::</module.type>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <TransactionManagerMainClass>pt.isel.meic.iesd.tm.TransactionManager</TransactionManagerMainClass>
+        <TransactionManagerMainClass>pt.isel.meic.iesd.tm.TransactionServer</TransactionManagerMainClass>
     </properties>
 
     <dependencies>
@@ -54,6 +54,11 @@
             <artifactId>weld-se-core</artifactId>
             <version>6.0.1.Final</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.9.3</version>
         </dependency>
     </dependencies>
 

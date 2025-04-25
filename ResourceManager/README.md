@@ -1,1 +1,0 @@
-This folder should contain the project for the Resource Manager

@@ -5,22 +5,28 @@ import java.util.List;
 
 import jakarta.jws.WebService;
 
-@WebService(endpointInterface = "pt.isel.meic.iesd.vectorservice.IVector")
+@WebService(endpointInterface = "pt.isel.meic.iesd.vs.IVector")
 public class Vector implements IVector {
+
+    private final ResourceManager resourceManager;
 
     private static final List<Integer> vector = Arrays.asList(300, 234, 56, 789);
     private final Integer baseLine = _getVariance();
 
+    public Vector(ResourceManager resourceManager) {
+        this.resourceManager = resourceManager;
+    }
+
     @Override
     public int read(int transactionID, int pos) {
-        // TODO: Ensure this call is only made in the context of a transaction
         System.out.println("Reading from vector position " + pos);
         return vector.get(pos);
     }
 
     @Override
     public void write(int transactionID, int pos, int n) {
-        // TODO: Ensure this call is only made in the context of a transaction
+        // Register resource manager inside
+        resourceManager.register(transactionID);
         System.out.println("Writing to vector in position " + pos + " with " + n);
         vector.set(pos, n);
     }
@@ -31,7 +37,6 @@ public class Vector implements IVector {
     // To ensure the invariance is kept
     @Override
     public Integer getVariance(int transactionID) {
-        // TODO: Ensure this call is only made in the context of a transaction
         return _getVariance();
     }
 

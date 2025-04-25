@@ -5,7 +5,7 @@ import jakarta.jws.WebService;
 import jakarta.jws.soap.SOAPBinding;
 import jakarta.jws.soap.SOAPBinding.Style;
 
-@WebService(name = "IVector", targetNamespace = "http://pt.isel.meic.iesd.vectorservice")
+@WebService(name = "IVector", targetNamespace = "http://pt.isel.meic.iesd.vs")
 @SOAPBinding(style = Style.DOCUMENT)
 public interface IVector {
 

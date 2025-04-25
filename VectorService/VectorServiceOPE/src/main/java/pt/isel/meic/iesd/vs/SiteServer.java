@@ -1,29 +1,61 @@
 package pt.isel.meic.iesd.vs;
 
 import jakarta.xml.ws.Endpoint;
+import pt.isel.meic.iesd.tm.ExitCode;
+
+import java.net.MalformedURLException;
 
 public class SiteServer {
+    static Integer ID;
     static final String HOSTNAME = "0.0.0.0"; 
     static final Integer PORT = 2060;
 
-    public static int main(String[] args) {
+    static final String TM_HOSTNAME = "0.0.0.0";
+    static final Integer TM_PORT = 2059;
+
+    public static void main(String[] args) {
         String hostname = HOSTNAME;
         int port = PORT;
         switch (args.length) {
-            case 2:
+            case 3:
                 try {
-                    port = Integer.parseInt(args[1]);
+                    port = Integer.parseInt(args[2]);
                 } catch (NumberFormatException e) {
                     System.err.println("Invalid parameter PORT");
-                    return ExitCode.INVALID_PORT.value();
+                    System.exit(ExitCode.INVALID_PORT.value());
+                    return;
                 }
+            case 2:
+                hostname = args[1];
             case 1:
-                hostname = args[0];
+                try {
+                    ID = Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid parameter ID");
+                    System.exit(ExitCode.INVALID_ID.value());
+                    return;
+                }
+                break;
+            default:
+                System.err.println("No ID provided!");
+                System.exit(ExitCode.INVALID_ID.value());
+                return;
         }
 
-        Endpoint ep = Endpoint.create(new Vector());
-        System.out.println("Starting VectorService...");
-        ep.publish("http://" + hostname + ":" + port + "/Vector");
-        return 0;
+        ResourceManager resourceManager;
+
+        try {
+            resourceManager = new ResourceManager(0, hostname, port, TM_HOSTNAME, TM_PORT);
+        } catch (MalformedURLException e) {
+            System.exit(ExitCode.INVALID_TM_URL.value());
+            return;
+        }
+
+        Endpoint vectorEndpoint = Endpoint.create(new Vector(resourceManager));
+        Endpoint xaEndpoint = Endpoint.create(new XaManager());
+        System.out.println("Starting Vector Service...");
+        vectorEndpoint.publish("http://" + hostname + ":" + port + "/Vector");
+        System.out.println("Starting XA Communication...");
+        xaEndpoint.publish("http://" + hostname + ":" + port + "/XA");
     }
 }
