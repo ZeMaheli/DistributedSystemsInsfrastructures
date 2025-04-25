@@ -1,4 +1,4 @@
-package comd.TPLM;
+package pt.isel.meic.iesd.tplm;
 
 import com.rabbitmq.client.*;
 import org.apache.zookeeper.*;
@@ -6,11 +6,10 @@ import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TPLM implements Watcher {
-    private static final String ZK_HOST;
-    private static final String QUEUE_NAME;
+    private static final String ZK_HOST = "0.0.0.0";
+    private static final String QUEUE_NAME = "queue";
 
     private ZooKeeper zk;
     private Connection rabbitConnection;

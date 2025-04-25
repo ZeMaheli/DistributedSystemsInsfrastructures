@@ -1,4 +1,4 @@
-package comd;
+package pt.isel.meic.iesd.tplm;
 
 public class Main {
     public static void main(String[] args) {

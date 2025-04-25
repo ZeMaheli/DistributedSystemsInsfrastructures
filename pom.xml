@@ -17,6 +17,7 @@
     </properties>
 
     <modules>
+        <module>TwoPhaseLockManager</module>
         <module>VectorService</module>
     </modules>
 </project>
