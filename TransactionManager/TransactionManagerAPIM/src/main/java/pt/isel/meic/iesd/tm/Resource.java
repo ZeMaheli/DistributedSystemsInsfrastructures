@@ -1,9 +1,17 @@
 package pt.isel.meic.iesd.tm;
 
-public class Resource {
-    private final int id;
-    private final String hostname;
-    private final int port;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
+import java.io.Serializable;
+
+@XmlRootElement(name = "Resource")
+public class Resource implements Serializable {
+    int id;
+    String hostname;
+    int port;
+
+    public Resource() { }
 
     public Resource(int id, String hostname, int port) {
         this.id = id;
@@ -11,15 +19,27 @@ public class Resource {
         this.port = port;
     }
 
-    public int getID() {
+    @XmlElement
+    public int getId() {
         return id;
     }
+    public void setId(int id) {
+        this.id = id;
+    }
 
+    @XmlElement
     public String getHostname() {
         return hostname;
     }
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
 
+    @XmlElement
     public int getPort() {
         return port;
+    }
+    public void setPort(int port) {
+        this.port = port;
     }
 }
