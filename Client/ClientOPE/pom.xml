@@ -2,51 +2,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
-
+  
     <parent>
         <groupId>pt.isel.meic.iesd</groupId>
-        <artifactId>VectorService</artifactId>
+        <artifactId>Client</artifactId>
         <version>0.1.0</version>
     </parent>
-
-    <groupId>pt.isel.meic.iesd.vs</groupId>
-    <artifactId>VectorServiceOPE</artifactId>
-    <name>${module.type} VectorServiceOPE</name>
-
+  
+    <groupId>pt.isel.meic.iesd.client</groupId>
+    <artifactId>ClientOPE</artifactId>
+    <name>${module.type} ClientOPE</name>
+  
     <properties>
         <module.type>SERVICE.OPE ::</module.type>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <VectorServiceMainClass>pt.isel.meic.iesd.vs.SiteServer</VectorServiceMainClass>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>pt.isel.meic.iesd.vs</groupId>
-            <artifactId>VectorServiceAPIM</artifactId>
-            <version>0.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>pt.isel.meic.iesd.tm</groupId>
-            <artifactId>TransactionManagerAPIM</artifactId>
+            <groupId>pt.isel.meic.iesd.client</groupId>
+            <artifactId>ClientAPIM</artifactId>
             <version>0.1.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>jakarta.xml.ws</groupId>
-            <artifactId>jakarta.xml.ws-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <version>3.9.3</version>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -59,10 +38,15 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.jboss.weld.se</groupId>
-            <artifactId>weld-se-core</artifactId>
-            <version>6.0.1.Final</version>
-            <type>jar</type>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.22.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.9.3</version>
         </dependency>
     </dependencies>
 
@@ -78,13 +62,6 @@
                     <maxmem>256M</maxmem>
                 </configuration>
             </plugin>
-            <!-- To use the plugin goals in your POM or parent POM -->
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin}</version>
-            </plugin>
-
-            <!-- to run with 'java -jar target/<name>-with-dependencies.jar' -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -98,7 +75,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        ${VectorServiceMainClass}
+                                        pt.isel.meic.iesd.client.VectorClient
                                     </mainClass>
                                 </manifest>
                             </archive>
@@ -109,27 +86,9 @@
                     </execution>
                 </executions>
             </plugin>
-            
-            <!-- ren with 'mvn exec:java' -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec-maven-plugin}</version>
-                <configuration>
-                    <mainClass>${VectorServiceMainClass}</mainClass>
-                </configuration>
-            </plugin>
-            
-            <!-- Added to generate programatically an OCI container image -->
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>${jib-maven-plugin}</version>
-                <configuration>
-                    <to>
-                        <image>localhost/vectorservice-oci-jib</image>
-                    </to>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

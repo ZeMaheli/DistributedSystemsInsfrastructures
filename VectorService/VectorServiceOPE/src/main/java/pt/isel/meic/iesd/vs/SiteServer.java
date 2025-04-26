@@ -42,20 +42,24 @@ public class SiteServer {
                 return;
         }
 
-        ResourceManager resourceManager;
-
         try {
-            resourceManager = new ResourceManager(0, hostname, port, TM_HOSTNAME, TM_PORT);
+            ResourceManager resourceManager = new ResourceManager(ID, hostname, port, TM_HOSTNAME, TM_PORT);
+            Vector vector = new Vector(resourceManager);
+            resourceManager.setVector(vector);
+            Endpoint vectorEndpoint = Endpoint.create(vector);
+            Endpoint xaEndpoint = Endpoint.create(new XaManager(resourceManager));
+            System.out.println("Starting Vector Service...");
+            vectorEndpoint.publish("http://" + hostname + ":" + port + "/Vector");
+            System.out.println("Starting XA Communication...");
+            xaEndpoint.publish("http://" + hostname + ":" + port + "/XA");
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Shutdown detected! Setting ResourceManager offline...");
+                resourceManager.setOffline();
+            }));
         } catch (MalformedURLException e) {
             System.exit(ExitCode.INVALID_TM_URL.value());
             return;
         }
-
-        Endpoint vectorEndpoint = Endpoint.create(new Vector(resourceManager));
-        Endpoint xaEndpoint = Endpoint.create(new XaManager());
-        System.out.println("Starting Vector Service...");
-        vectorEndpoint.publish("http://" + hostname + ":" + port + "/Vector");
-        System.out.println("Starting XA Communication...");
-        xaEndpoint.publish("http://" + hostname + ":" + port + "/XA");
     }
 }

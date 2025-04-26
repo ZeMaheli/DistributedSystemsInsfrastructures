@@ -7,7 +7,6 @@ import jakarta.jws.WebService;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.vs.IVector")
 public class Vector implements IVector {
-
     private final ResourceManager resourceManager;
 
     private static final List<Integer> vector = Arrays.asList(300, 234, 56, 789);
@@ -20,6 +19,12 @@ public class Vector implements IVector {
     @Override
     public int read(int transactionID, int pos) {
         System.out.println("Reading from vector position " + pos);
+        // Ask the RM if there's a buffered value
+        Integer bufferedValue = resourceManager.readBuffered(transactionID, pos);
+        if (bufferedValue != null) {
+            return bufferedValue;
+        }
+
         return vector.get(pos);
     }
 
@@ -27,8 +32,14 @@ public class Vector implements IVector {
     public void write(int transactionID, int pos, int n) {
         // Register resource manager inside
         resourceManager.register(transactionID);
-        System.out.println("Writing to vector in position " + pos + " with " + n);
-        vector.set(pos, n);
+        System.out.println("Vector: Delegating write of value " + n + " at pos " + pos + " to ResourceManager.");
+        resourceManager.bufferWrite(transactionID, pos, n);
+    }
+
+    // Used internally when committing
+    public void applyWrite(int pos, int value) {
+        System.out.println("Vector: Applying write value " + value + " at pos " + pos);
+        vector.set(pos, value);
     }
 
     // ATTENTION: The variance should only be returned on a valid state.

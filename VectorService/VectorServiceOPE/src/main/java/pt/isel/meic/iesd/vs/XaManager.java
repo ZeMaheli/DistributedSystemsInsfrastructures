@@ -5,20 +5,28 @@ import pt.isel.meic.iesd.tm.IXA;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.tm.IXA")
 public class XaManager implements IXA {
+    private final ResourceManager resourceManager;
+
+    public XaManager(ResourceManager resourceManager) {
+        this.resourceManager = resourceManager;
+    }
 
     @Override
     public boolean prepare(int transactionID) {
-        return false;
+        System.out.println("XaManager: prepare transaction " + transactionID);
+        return resourceManager.prepare(transactionID);
     }
 
     @Override
     public boolean commit(int transactionID) {
-        return false;
+        System.out.println("XaManager: commit transaction " + transactionID);
+        return resourceManager.commit(transactionID);
     }
 
     @Override
     public boolean rollback(int transactionID) {
-        return false;
+        System.out.println("XaManager: rollback transaction " + transactionID);
+        return resourceManager.rollback(transactionID);
     }
 }
 
