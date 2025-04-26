@@ -7,12 +7,12 @@ import jakarta.jws.WebService;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.vs.IVector")
 public class Vector implements IVector {
-    private final ResourceManager resourceManager;
+    private final IResourceManager resourceManager;
 
     private static final List<Integer> vector = Arrays.asList(300, 234, 56, 789);
     private final Integer baseLine = _getVariance();
 
-    public Vector(ResourceManager resourceManager) {
+    public Vector(IResourceManager resourceManager) {
         this.resourceManager = resourceManager;
     }
 

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,11 +19,45 @@ public class VectorTest {
 
     // Mock ResourceManager since it's needed by Vector
     static class MockResourceManager implements IResourceManager {
-        public MockResourceManager() { }
+        private final Map<Integer, Map<Integer, Integer>> pendingWrites = new HashMap<>();
 
         @Override
         public void register(int transactionID) {
             // No-op for testing
+        }
+
+        @Override
+        public void bufferWrite(int transactionID, int pos, int value) {
+            pendingWrites.computeIfAbsent(transactionID, k -> new HashMap<>()).put(pos, value);
+        }
+
+
+        @Override
+        public boolean prepare(int transactionID) {
+            return false;
+        }
+
+        @Override
+        public boolean commit(int transactionID) {
+            return false;
+        }
+
+        @Override
+        public boolean rollback(int transactionID) {
+            return false;
+        }
+
+        @Override
+        public Integer readBuffered(int transactionID, int pos) {
+            if (pendingWrites.containsKey(transactionID) && pendingWrites.get(transactionID).containsKey(pos)) {
+                return pendingWrites.get(transactionID).get(pos);
+            }
+            return null;
+        }
+
+        @Override
+        public void setOffline() {
+
         }
     }
 

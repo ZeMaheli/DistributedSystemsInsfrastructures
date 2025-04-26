@@ -15,7 +15,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResourceManager {
+public class ResourceManager implements IResourceManager {
 
     private final int ID;
     private final String HOSTNAME;
@@ -42,8 +42,10 @@ public class ResourceManager {
     }
 
     public void register(int transactionID) {
-        // FIXME: Make the jaxws-maven-plugin import the Resource constructor parameters
-        Resource resource = new Resource(/*ID, HOSTNAME, PORT*/);
+        Resource resource = new Resource();
+        resource.setId(ID);
+        resource.setHostname(HOSTNAME);
+        resource.setPort(PORT);
         axManager.register(transactionID, resource);
     }
 
