@@ -1,0 +1,9 @@
+# obtain the base Linux image with Java runtime
+FROM eclipse-temurin:21-jre-jammy
+
+# Place java executable at /usr/app
+COPY ./target/ClientOPE-0.1.0-jar-with-dependencies.jar /usr/app/
+
+
+# Starts the Client service
+CMD ["java","-jar","/usr/app/ClientOPE-0.1.0-jar-with-dependencies.jar"]

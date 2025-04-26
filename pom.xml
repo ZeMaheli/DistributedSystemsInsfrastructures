@@ -20,5 +20,6 @@
         <module>TransactionManager</module>
         <module>TwoPhaseLockManager</module>
         <module>VectorService</module>
+        <module>Client</module>
     </modules>
 </project>
