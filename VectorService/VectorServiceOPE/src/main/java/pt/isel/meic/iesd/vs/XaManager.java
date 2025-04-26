@@ -5,9 +5,9 @@ import pt.isel.meic.iesd.tm.IXA;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.tm.IXA")
 public class XaManager implements IXA {
-    private final ResourceManager resourceManager;
+    private final IResourceManager resourceManager;
 
-    public XaManager(ResourceManager resourceManager) {
+    public XaManager(IResourceManager resourceManager) {
         this.resourceManager = resourceManager;
     }
 
