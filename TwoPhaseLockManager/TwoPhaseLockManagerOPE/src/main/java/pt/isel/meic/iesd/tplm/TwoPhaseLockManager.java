@@ -184,8 +184,9 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
     }
 
     @Override
-    public void get_locks(String txnID, List<Lock> requestedLocks) {
+    public void get_locks(String txnID, String v1, int pos1, String v2, int pos2) {
         try {
+            List<Lock> requestedLocks = List.of(new Lock(v1, pos1), new Lock(v2, pos2));
             // check all RMs and collect any inactive ones
             List<String> inactiveRMs = new ArrayList<>();
 

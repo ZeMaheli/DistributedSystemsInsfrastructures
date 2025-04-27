@@ -2,9 +2,7 @@ package pt.isel.meic.iesd.client;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -17,7 +15,6 @@ import pt.isel.meic.iesd.vs.VectorService;
 import pt.isel.meic.iesd.vs.IVector;
 import pt.isel.meic.iesd.tm.ITransaction;
 import pt.isel.meic.iesd.tm.TransactionManagerService;
-import pt.isel.meic.iesd.rnm.Lock;
 
 import javax.xml.namespace.QName;
 
@@ -74,10 +71,7 @@ public class VectorClient {
     private void sendLocksRequest(int txnID, String v1, int pos1, String v2, int pos2) {
         TwoPhaseLockManagerService tplmService = new TwoPhaseLockManagerService();
         ITwoPhaseLockManager tplm = tplmService.getTwoPhaseLockManagerPort();
-        Lock lock1 = new Lock(v1, pos1);
-        Lock lock2 = new Lock(v2, pos2);
-        List<Lock> list = List.of(lock1, lock2);
-        tplm.get_locks(txnID, list);
+        tplm.getLocks(String.valueOf(txnID), v1, pos1, v2, pos2);
     }
 
     public void listenForLockReply(int txnID) throws Exception {
@@ -115,7 +109,7 @@ public class VectorClient {
         return vectorService.getVectorPort();
     }
 
-    public String getVectorServiceUrl(String vectorID) throws Exception {
+    public String getVectorServiceUrl(String vectorID) {
         ReliableNodeManagerClService rnmService = new ReliableNodeManagerClService();
         IReliableNodeManagerCl rnm = rnmService.getReliableNodeManagerClPort();
         return rnm.getVectorServiceUrl(vectorID);

@@ -4,8 +4,6 @@ import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 import jakarta.jws.soap.SOAPBinding;
 
-import java.util.List;
-
 /**
  * Interface for the TwoPhaseLockManager.
  */
@@ -24,8 +22,7 @@ public interface ITwoPhaseLockManager {
      * Requests locks for a transaction.
      *
      * @param txnID the transaction ID.
-     * @param locks the list of locks to acquire.
      */
     @WebMethod
-    void get_locks(String txnID, List<pt.isel.meic.iesd.rnm.Lock> locks);
+    void get_locks(String txnID, String v1, int pos1, String v2, int pos2);
 }
