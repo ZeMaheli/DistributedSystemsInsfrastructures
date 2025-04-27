@@ -1,6 +1,9 @@
 package pt.isel.meic.iesd.tm;
 
 import jakarta.jws.WebService;
+import pt.isel.meic.iesd.tplm.ITwoPhaseLockManager;
+import pt.isel.meic.iesd.tplm.TwoPhaseLockManagerService;
+
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
@@ -8,10 +11,13 @@ import java.util.ArrayList;
 public class TransactionManager implements ITransaction {
     private final TransactionService transactionService;
     private final IXaRepository xaRepository;
+    private final ITwoPhaseLockManager tplm;
 
     public TransactionManager(TransactionService transactionService, IXaRepository xaRepository) {
         this.transactionService = transactionService;
         this.xaRepository = xaRepository;
+        TwoPhaseLockManagerService tplmService = new TwoPhaseLockManagerService();
+        this.tplm = tplmService.getTwoPhaseLockManagerPort();
     }
 
     @Override
@@ -24,6 +30,7 @@ public class TransactionManager implements ITransaction {
     public String commit(int transactionID) {
         Transaction transaction = transactionService.getTransaction(transactionID);
         if (transaction.getResources().isEmpty()) return "NO_RESOURCES";
+        String txnId = String.valueOf(transactionID);
         try {
             ArrayList<IXA> xaManagers = new ArrayList<>();
             boolean prepared = true;
@@ -31,8 +38,7 @@ public class TransactionManager implements ITransaction {
                 IXA xaManager = xaRepository.getManager(resource);
                 if (xaManager.prepare(transactionID)) {
                     xaManagers.add(xaManager);
-                }
-                else {
+                } else {
                     prepared = false;
                     break;
                 }
@@ -54,10 +60,12 @@ public class TransactionManager implements ITransaction {
                     }
                 }
                 if (!invalid_state) {
+                    tplm.releaseAllLocks(txnId);
                     return "ROLLED_BACK";
                 }
                 return "FAILED";
             }
+            tplm.releaseAllLocks(txnId);
             return "SUCCESS";
         } catch (MalformedURLException e) {
             return "FAILED";
@@ -91,6 +99,7 @@ public class TransactionManager implements ITransaction {
             if (!rolled) {
                 return "FAILED";
             }
+            tplm.releaseAllLocks(String.valueOf(transactionID));
             return "ROLLED_BACK";
         } catch (MalformedURLException e) {
             return "FAILED";
