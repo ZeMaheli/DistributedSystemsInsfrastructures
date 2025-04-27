@@ -35,7 +35,7 @@ public class ResourceManager implements IResourceManager {
         this.HOSTNAME = hostname;
         this.PORT = port;
         URL wsdlUrl = new URL("http://" + tm_hostname + ":" + tm_port + "/AX?wsdl");
-        QName serviceName = new QName("http://example.com/soap", "MyService");
+        QName serviceName = new QName("http://tm.iesd.meic.isel.pt/", "AxManagerService");
         Service service = AxManagerService.create(wsdlUrl, serviceName);
         axManager = service.getPort(IAX.class);
         registerInZookeeper();

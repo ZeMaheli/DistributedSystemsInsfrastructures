@@ -5,7 +5,8 @@ public enum ExitCode {
     INVALID_HOSTNAME,
     INVALID_PORT,
     INVALID_ZOOKEEPER_CONNECTION,
-    INVALID_TM_URL
+    INVALID_TM_URL,
+    ZOOKEEPER_EXCEPTION
     ;
 
     public int value() {

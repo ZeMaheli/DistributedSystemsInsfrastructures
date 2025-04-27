@@ -38,6 +38,32 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>${jaxws-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>wsimport TransactionManager</id>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Alternative less adaptive to changes of AX interface
+                           <wsdlLocation>${basedir}/src/main/resources/jaxws/XA.wsdl</wsdlLocation>
+                            -->
+
+                            <!-- execute java -jar target\TransactionManagerOPE-0.1.0-jar-with-dependencies.jar -->
+                            <wsdlUrls>
+                                <wsdlUrl>http://localhost:2060/XA?wsdl</wsdlUrl>
+                            </wsdlUrls>
+
+                            <packageName>pt.isel.meic.iesd.tm.gen</packageName>
+                            <sourceDestDir>${basedir}/src/main/java</sourceDestDir>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin}</version>
             </plugin>

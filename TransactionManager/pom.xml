@@ -24,6 +24,7 @@
         <jakarta.xml.ws-api>4.0.2</jakarta.xml.ws-api>
         <jaxws-rt>4.0.3</jaxws-rt>
         <maven-surefire-plugin>3.5.2</maven-surefire-plugin>
+        <jaxws-maven-plugin>4.0.3</jaxws-maven-plugin>
         <jib-maven-plugin>3.4.5</jib-maven-plugin>
         <junit-bom>5.12.0</junit-bom>
     </properties>

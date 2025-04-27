@@ -1,6 +1,7 @@
 package pt.isel.meic.iesd.tm;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Transaction {
     private final Integer ID;
@@ -20,11 +21,19 @@ public class Transaction {
         return state;
     }
 
-    public void addResourceManager(Resource resource) {
+    public void setState(TransactionState state) {
+        this.state = state;
+    }
+
+    public void addResource(Resource resource) {
         resources.add(resource);
     }
 
-    public void removeResourceManager(Resource resource) {
+    public void removeResource(Resource resource) {
         resources.remove(resource);
+    }
+
+    public List<Resource> getResources() {
+        return resources.stream().toList();
     }
 }
