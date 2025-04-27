@@ -28,13 +28,9 @@ public class TPLMServer {
 
         TwoPhaseLockManager tplm = new TwoPhaseLockManager(rabbitMQHost, rabbitMQPort);
 
-        // Publish client-only endpoint
+        // Publish endpoint
         Endpoint clientEndpoint = Endpoint.create(tplm);
-        clientEndpoint.publish("http://" + HOSTNAME + ":" + PORT + "/TPLMClient");
-
-        // Publish transaction-manager-only endpoint
-        Endpoint tmEndpoint = Endpoint.create(tplm);
-        tmEndpoint.publish("http://" + HOSTNAME + ":" + (Integer.parseInt(PORT) + 1) + "/TPLMTM");
+        clientEndpoint.publish("http://" + HOSTNAME + ":" + PORT + "/TPLM");
     }
 
 }

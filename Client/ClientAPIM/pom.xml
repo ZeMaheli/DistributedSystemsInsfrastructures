@@ -113,6 +113,25 @@
                             <sourceDestDir>${basedir}/src/main/java</sourceDestDir>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>wsimport TwoPhaseLockManager</id>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Alternative less adaptive to changes of AX interface
+                           <wsdlLocation>${basedir}/src/main/resources/jaxws/AX.wsdl</wsdlLocation>
+                            -->
+
+                            <!-- execute java -jar target\TransactionManagerOPE-0.1.0-jar-with-dependencies.jar -->
+                            <wsdlUrls>
+                                <wsdlUrl>http://localhost:3000/TPLM?wsdl</wsdlUrl>
+                            </wsdlUrls>
+
+                            <packageName>pt.isel.meic.iesd.tplm</packageName>
+                            <sourceDestDir>${basedir}/src/main/java</sourceDestDir>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

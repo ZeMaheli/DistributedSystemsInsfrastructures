@@ -9,12 +9,16 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <groupId>pt.isel.meic.iesd.tplm</groupId>
     <artifactId>TwoPhaseLockManagerOPE</artifactId>
+    <name>${module.type} TwoPhaseLockManagerOPE</name>
 
     <properties>
+        <module.type>SERVICE.OPE ::</module.type>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <TwoPhaseLockManagerMainClass>pt.isel.meic.iesd.tplm.TPLMServer</TwoPhaseLockManagerMainClass>
     </properties>
 
     <dependencies>
@@ -24,10 +28,9 @@
             <version>0.1.0</version>
         </dependency>
         <dependency>
-            <groupId>pt.isel.meic.iesd</groupId>
+            <groupId>pt.isel.meic.iesd.tplm</groupId>
             <artifactId>TwoPhaseLockManagerAPIM</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>
@@ -36,5 +39,72 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <maxmem>256M</maxmem>
+                </configuration>
+            </plugin>
+            <!-- To use the plugin goals in your POM or parent POM -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin}</version>
+            </plugin>
+
+            <!-- to run with 'java -jar target/<name>-with-dependencies.jar' -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>
+                                        ${TwoPhaseLockManagerMainClass}
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ren with 'mvn exec:java' -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin}</version>
+                <configuration>
+                    <mainClass>${TwoPhaseLockManagerMainClass}</mainClass>
+                </configuration>
+            </plugin>
+
+            <!-- Added to generate programatically an OCI container image -->
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin}</version>
+                <configuration>
+                    <to>
+                        <image>localhost/tplm-oci-jib</image>
+                    </to>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

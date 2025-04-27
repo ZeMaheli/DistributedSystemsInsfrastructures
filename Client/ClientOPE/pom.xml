@@ -25,7 +25,11 @@
             <artifactId>ClientAPIM</artifactId>
             <version>0.1.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>pt.isel.meic.iesd.rnm</groupId>
+            <artifactId>ReliableNodeManagerAPIM</artifactId>
+            <version>0.1.0</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

@@ -1,12 +1,11 @@
 package pt.isel.meic.iesd.tplm;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import jakarta.jws.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerTPLM;
+import pt.isel.meic.iesd.rnm.ReliableNodeManagerTPLMService;
+import pt.isel.meic.iesd.rnm.Lock;
 
 /**
  * TwoPhaseLockManager (TPLM) manages locks across distributed Resource Managers (RMs),
@@ -22,7 +24,8 @@ import java.util.concurrent.TimeoutException;
  * It verifies RM availability, grants locks, queues pending requests, and
  * communicates lock grants asynchronously through RabbitMQ.
  */
-public class TwoPhaseLockManager implements ITPLMTransactionManager, ITPLMClient {
+@WebService(endpointInterface = "pt.isel.meic.iesd.tplm.ITwoPhaseLockManager")
+public class TwoPhaseLockManager implements ITwoPhaseLockManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TwoPhaseLockManager.class);
 
@@ -34,7 +37,6 @@ public class TwoPhaseLockManager implements ITPLMTransactionManager, ITPLMClient
 
     private final IReliableNodeManagerTPLM rnm;
     private final Channel rabbitChannel;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     /**
@@ -46,7 +48,8 @@ public class TwoPhaseLockManager implements ITPLMTransactionManager, ITPLMClient
      */
     public TwoPhaseLockManager(String rabbitMQHost, int rabbitMQPort) throws IOException, TimeoutException {
         loadConfig();
-        rnm = new ReliableNodeManager();
+        ReliableNodeManagerTPLMService rnmService = new ReliableNodeManagerTPLMService();
+        rnm = rnmService.getReliableNodeManagerTPLMPort();
         rabbitChannel = setupRabbiMQChannel(rabbitMQHost, rabbitMQPort);
     }
 

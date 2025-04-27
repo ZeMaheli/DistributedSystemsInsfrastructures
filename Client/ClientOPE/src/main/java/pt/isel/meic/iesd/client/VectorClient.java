@@ -11,10 +11,13 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import pt.isel.meic.iesd.rnm.IReliableNodeManagerCl;
 import pt.isel.meic.iesd.rnm.ReliableNodeManagerClService;
+import pt.isel.meic.iesd.tplm.ITwoPhaseLockManager;
+import pt.isel.meic.iesd.tplm.TwoPhaseLockManagerService;
 import pt.isel.meic.iesd.vs.VectorService;
 import pt.isel.meic.iesd.vs.IVector;
 import pt.isel.meic.iesd.tm.ITransaction;
 import pt.isel.meic.iesd.tm.TransactionManagerService;
+import pt.isel.meic.iesd.rnm.Lock;
 
 import javax.xml.namespace.QName;
 
@@ -69,12 +72,12 @@ public class VectorClient {
     }
 
     private void sendLocksRequest(int txnID, String v1, int pos1, String v2, int pos2) {
-        // TODO - Update this
-        TPLM tplm = new TPLM();
-        //IVector port = service.getVectorPort();
+        TwoPhaseLockManagerService tplmService = new TwoPhaseLockManagerService();
+        ITwoPhaseLockManager tplm = tplmService.getTwoPhaseLockManagerPort();
         Lock lock1 = new Lock(v1, pos1);
         Lock lock2 = new Lock(v2, pos2);
-        port.get_locks(txnID, List.of(lock1, lock2));
+        List<Lock> list = List.of(lock1, lock2);
+        tplm.get_locks(txnID, list);
     }
 
     public void listenForLockReply(int txnID) throws Exception {
