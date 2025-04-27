@@ -1,4 +1,4 @@
-package pt.isel.meic.ised.tplm;
+package pt.isel.meic.iesd.tplm;
 
 /**
  * Represents a lock request on a specific element inside a vector managed by a Resource Manager.

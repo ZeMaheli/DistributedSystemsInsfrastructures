@@ -1,15 +1,19 @@
-package pt.isel.meic.ised.tplm;
+package pt.isel.meic.iesd.tplm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 /**
  * TwoPhaseLockManager (TPLM) manages locks across distributed Resource Managers (RMs),
@@ -18,9 +22,9 @@ import java.util.Properties;
  * It verifies RM availability, grants locks, queues pending requests, and
  * communicates lock grants asynchronously through RabbitMQ.
  */
-public class TwoPhaseLockManager implements ITwoPhaseLockManager {
+public class TwoPhaseLockManager implements ITPLMTransactionManager, ITPLMClient {
 
-    protected final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(TwoPhaseLockManager.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwoPhaseLockManager.class);
 
     String basePath;
     String holderSuffix;
@@ -36,24 +40,41 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
     /**
      * Constructs a TwoPhaseLockManager instance, setting up configuration and RabbitMQ connection.
      *
-     * @param rabbitmqHost the RabbitMQ server address for lock grant notifications.
+     * @param rabbitMQHost the RabbitMQ server address for lock grant notifications.
+     * @param rabbitMQPort the RabbitMQ server port.
      * @throws Exception if setup fails.
      */
-    public TwoPhaseLockManager(String rabbitmqHost) throws Exception {
-        try {
-            loadConfig();
+    public TwoPhaseLockManager(String rabbitMQHost, int rabbitMQPort) throws IOException, TimeoutException {
+        loadConfig();
+        rnm = new ReliableNodeManager();
+        rabbitChannel = setupRabbiMQChannel(rabbitMQHost, rabbitMQPort);
+    }
 
-            // Setup RabbitMQ
-            LOG.info("Starting RabbitMQ Client...");
+    /**
+     * Initializes the RabbitMQ channel for communication.
+     *
+     * @param rabbitMQHost the RabbitMQ server address.
+     * @param rabbitMQPort the RabbitMQ server port.
+     * @return the RabbitMQ channel.
+     * @throws IOException      if an I/O error occurs during channel setup.
+     * @throws TimeoutException if the connection times out.
+     */
+    private Channel setupRabbiMQChannel(String rabbitMQHost, int rabbitMQPort) throws IOException, TimeoutException {
+        final Channel rabbitChannel;
+        LOGGER.info("Starting RabbitMQ Client...");
+        try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost(rabbitmqHost);
+            factory.setHost(rabbitMQHost);
+            factory.setPort(rabbitMQPort);
             Connection connection = factory.newConnection();
             rabbitChannel = connection.createChannel();
-            LOG.info("RabbitMQ session established.");
+            LOGGER.info("RabbitMQ session established.");
         } catch (Exception e) {
-            LOG.log(System.Logger.Level.ERROR, "TwoPhaseLockManager instantiation error occurred with:", e);
+            LOGGER.error("Failed to setup connection to rabbitMQ broker", e);
             throw new RuntimeException(e);
         }
+
+        return rabbitChannel;
     }
 
     /**
@@ -62,6 +83,7 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
      * @throws RuntimeException if the configuration cannot be loaded.
      */
     private void loadConfig() {
+        LOGGER.info("Loading TPLM configuration...");
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("tplm.properties")) {
             Properties prop = new Properties();
             if (input == null) {
@@ -74,8 +96,9 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
             pendingLocksPath = prop.getProperty("locks.pending_base_path");
             locksHeldPath = prop.getProperty("locks.held_base_path");
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to load configuration", ex);
+            LOGGER.error("Error loading TPLM configuration", ex);
         }
+        LOGGER.info("TPLM configuration loaded successfully.");
     }
 
     /**
@@ -107,20 +130,20 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
         for (Lock lock : vectorPositions) {
             String holderPath = basePath + "/" + lock.vectorId + "/" + lock.element + "/holder";
             rnm.setHolder(holderPath, lock.vectorId, lock.element, txnID);
-            rnm.addLockHeld(holderPath, lock); // Track locks held by txn
+            rnm.addLockHeld(txnID, lock); // Track locks held by txn
         }
     }
 
     /**
-     * Publishes a "LOCK_GRANTED" message to the RabbitMQ queue named after the transaction ID.
+     * Sends a lock request notification message to the transaction.
      *
      * @param txnID the transaction receiving the lock grant notification.
-     * @throws Exception if RabbitMQ publishing fails.
+     * @param msg   the message content.
+     * @throws IOException if RabbitMQ publishing fails.
      */
-    private void sendLockGrantedMessage(String txnID) throws Exception {
-        String message = "LOCK_GRANTED";
+    private void sendLockRequestMessage(String txnID, String msg) throws IOException {
         rabbitChannel.queueDeclare(txnID, false, false, false, null);
-        rabbitChannel.basicPublish("", txnID, null, message.getBytes(StandardCharsets.UTF_8));
+        rabbitChannel.basicPublish("", txnID, null, msg.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -142,8 +165,8 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
 
             if (canGrantAll(pendingLocks)) {
                 holdLocks(txnID, pendingLocks);
-                rnm.removePendingRequest(txnID);
-                sendLockGrantedMessage(txnID);
+                rnm.removePendingRequest(pendingPath, txnID);
+                sendLockRequestMessage(txnID, "LOCK_GRANTED");
             }
         }
     }
@@ -158,7 +181,7 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
     }
 
     @Override
-    public int get_locks(String txnID, List<Lock> requestedLocks) {
+    public void get_locks(String txnID, List<Lock> requestedLocks) {
         try {
             // check all RMs and collect any inactive ones
             List<String> inactiveRMs = new ArrayList<>();
@@ -170,21 +193,27 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
             }
 
             if (!inactiveRMs.isEmpty()) {
-                LOG.warning("Inactive RMs detected for txnID=" + txnID + ": " + String.join(", ", inactiveRMs));
-                return -1;
+                LOGGER.warn("Inactive RMs detected for txnID={}: {}", txnID, String.join(", ", inactiveRMs));
+                sendLockRequestMessage(txnID, "RM_INACTIVE: " + String.join(", ", inactiveRMs));
+                return;
             }
 
             // check if all requested locks can be granted
             if (canGrantAll(requestedLocks)) {
                 holdLocks(txnID, requestedLocks);
-                sendLockGrantedMessage(txnID);
+                sendLockRequestMessage(txnID, "LOCK_GRANTED");
             } else {
                 rnm.addPendingRequest(pendingLocksPath, txnID, requestedLocks);
             }
-            return 0;
+        } catch (IOException ex) {
+            LOGGER.error("Error sending lock request message for txnID={}", txnID, ex);
         } catch (Exception e) {
-            LOG.log(System.Logger.Level.ERROR, "Error during get_locks for txnID=" + txnID, e);
-            return -1;
+            LOGGER.error("Error during get_locks for txnID={}", txnID, e);
+            try {
+                sendLockRequestMessage(txnID, "LOCK_REQUEST_FAILED");
+            } catch (IOException ex) {
+                LOGGER.error("Error sending lock request message for txnID={}", txnID, ex);
+            }
         }
     }
 
@@ -204,7 +233,7 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
 
             rnm.clearLocksHeld(locksHeldPath, txnID); // Clean up txn record
         } catch (Exception e) {
-            LOG.log(System.Logger.Level.ERROR, "Error during release_all_locks for txnID=" + txnID, e);
+            LOGGER.error("Error during release_all_locks for txnID={}", txnID, e);
         }
     }
 }
