@@ -32,7 +32,7 @@ public class TwoPhaseLockManager implements ITPLMTransactionManager, ITPLMClient
     String pendingLocksPath;
     String locksHeldPath;
 
-    private final ReliableNodeManager rnm;
+    private final IReliableNodeManagerTPLM rnm;
     private final Channel rabbitChannel;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -187,7 +187,7 @@ public class TwoPhaseLockManager implements ITPLMTransactionManager, ITPLMClient
             List<String> inactiveRMs = new ArrayList<>();
 
             for (Lock lock : requestedLocks) {
-                if (!rnm.checkRmStatus(path, lock.vectorId)) {
+                if (!rnm.checkRmStatus(lock.vectorId)) {
                     inactiveRMs.add(lock.vectorId);
                 }
             }
@@ -226,8 +226,7 @@ public class TwoPhaseLockManager implements ITPLMTransactionManager, ITPLMClient
             if (heldLocks == null || heldLocks.isEmpty()) return;
 
             for (Lock lock : heldLocks) {
-                rnm.clearHolder(basePath + "/" + lock.vectorId + "/" + lock.element + "/holder";,
-                lock.vectorId, lock.element); // Free the lock
+                rnm.clearHolder(basePath + "/" + lock.vectorId + "/" + lock.element + "/holder", lock.vectorId, lock.element); // Free the lock
                 checkPendingRequests(lock.vectorId, lock.element);
             }
 

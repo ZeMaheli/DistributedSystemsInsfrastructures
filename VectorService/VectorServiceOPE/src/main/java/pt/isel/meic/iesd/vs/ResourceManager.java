@@ -1,10 +1,8 @@
 package pt.isel.meic.iesd.vs;
 
 import jakarta.xml.ws.Service;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs;
-import org.apache.zookeeper.ZooKeeper;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerRM;
+import pt.isel.meic.iesd.rnm.ReliableNodeManagerRMService;
 import pt.isel.meic.iesd.tm.AxManagerService;
 import pt.isel.meic.iesd.tm.IAX;
 import pt.isel.meic.iesd.tm.Resource;
@@ -23,8 +21,8 @@ public class ResourceManager implements IResourceManager {
     static IAX axManager;
     private Vector vector;
     private final Map<Integer, Map<Integer, Integer>> pendingWrites = new HashMap<>();
-    private static final String ZK_HOST = "0.0.0.0";
-    private ZooKeeper zk;
+
+    private final IReliableNodeManagerRM rnm;
 
     public void setVector(Vector vector) {
         this.vector = vector;
@@ -38,6 +36,8 @@ public class ResourceManager implements IResourceManager {
         QName serviceName = new QName("http://tm.iesd.meic.isel.pt/", "AxManagerService");
         Service service = AxManagerService.create(wsdlUrl, serviceName);
         axManager = service.getPort(IAX.class);
+        ReliableNodeManagerRMService rnmService = new ReliableNodeManagerRMService();
+        rnm = rnmService.getReliableNodeManagerRMPort();
         registerInZookeeper();
     }
 
@@ -90,59 +90,10 @@ public class ResourceManager implements IResourceManager {
     }
 
     private void registerInZookeeper() {
-        try {
-            zk = new ZooKeeper(ZK_HOST, 3000, event -> {});
-
-            // Ensure the parent node exists
-            if (zk.exists("/resource-managers", false) == null) {
-                zk.create("/resource-managers", new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            }
-
-            // Create the path for RM node
-            String rmPath = "/resource-managers/rm" + ID;
-
-            if (zk.exists(rmPath, false) == null) {
-                zk.create(rmPath, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            }
-            // Create or update the status, vID, and url in separate znodes
-            createOrUpdateZnode(rmPath + "/status", "online");
-            createOrUpdateZnode(rmPath + "/vID", "vec" + ID);
-            createOrUpdateZnode(rmPath + "/url", "http://" + HOSTNAME + ":" + PORT + "/Vector");
-
-            System.out.println("Registered RM at path: " + rmPath);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        rnm.registerInZookeeper(ID, HOSTNAME, PORT);
     }
 
     public void setOffline() {
-        try {
-            String statusPath = "/resource-managers/rm" + ID + "/status";
-
-            // Check if the 'status' znode exists
-            if (zk.exists(statusPath, false) != null) {
-                // Set the status znode to "offline"
-                zk.setData(statusPath, "offline".getBytes(), -1);
-
-                System.out.println("Set RM " + ID + " as offline in Zookeeper.");
-            } else {
-                System.err.println("Status znode for RM " + ID + " not found.");
-            }
-            zk.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createOrUpdateZnode(String path, String data) throws KeeperException, InterruptedException {
-        // Check if the znode exists
-        if (zk.exists(path, false) == null) {
-            // Create the znode if it doesn't exist
-            zk.create(path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        } else {
-            // Update the znode data if it exists
-            zk.setData(path, data.getBytes(), -1);
-        }
+        rnm.setOffline(ID);
     }
 }
