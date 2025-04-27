@@ -54,7 +54,6 @@ public class ResourceManager implements IResourceManager {
     }
 
     public boolean prepare(int transactionID) {
-        // TODO - add validation logic - return FALSE if not ready, TRUE if ready
         System.out.println("Preparing transaction " + transactionID);
 
         if (!pendingWrites.containsKey(transactionID)) {

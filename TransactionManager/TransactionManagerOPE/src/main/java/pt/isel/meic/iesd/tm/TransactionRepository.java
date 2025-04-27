@@ -50,6 +50,7 @@ public class TransactionRepository implements ITransactionRepository {
             createNode(rmPath);
             transaction.getResources().forEach( r -> {
                 try {
+                    System.out.println("Created rmID path");
                     updateNode(rmPath + "/" + r.id, r.hostname + ":" + r.port);
                 } catch (InterruptedException | KeeperException e) {
                     System.exit(ExitCode.ZOOKEEPER_EXCEPTION.value());

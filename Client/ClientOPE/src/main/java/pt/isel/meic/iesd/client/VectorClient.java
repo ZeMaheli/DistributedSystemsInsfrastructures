@@ -49,6 +49,8 @@ public class VectorClient {
             // Do read/write on vectors
             cl.vectorOperations(txnID, v1, pos1, v2, pos2, amount);
 
+            System.out.println("Will be asking for commit");
+
             String reply = tmPort.commit(txnID);
             System.out.println(reply);
         } catch (Exception e) {

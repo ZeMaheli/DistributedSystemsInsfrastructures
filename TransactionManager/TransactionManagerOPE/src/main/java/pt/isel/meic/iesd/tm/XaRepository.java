@@ -12,7 +12,7 @@ public class XaRepository implements IXaRepository {
     @Override
     public IXA getManager(Resource resource) throws MalformedURLException {
         URL wsdlUrl = new URL("http://" + resource.hostname + ":" + resource.port + "/XA?wsdl");
-        QName serviceName = new QName("http://tm.iesd.meic.isel.pt/", "XaManagerService");
+        QName serviceName = new QName("http://vs.iesd.meic.isel.pt/", "XaManagerService");
         Service service = XaManagerService.create(wsdlUrl, serviceName);
         return service.getPort(IXA.class);
     }
