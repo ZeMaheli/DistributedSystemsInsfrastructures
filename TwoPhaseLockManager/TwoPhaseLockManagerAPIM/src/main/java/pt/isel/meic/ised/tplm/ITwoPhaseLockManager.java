@@ -4,6 +4,7 @@ import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 
 import java.util.List;
+import pt.isel.meic.iesd.rnm.Lock;
 
 /**
  * Interface for the TwoPhaseLockManager, exposing transactional lock management methods.

@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerTPLM;
+import pt.isel.meic.iesd.rnm.ReliableNodeManagerTPLMService;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import pt.isel.meic.iesd.rnm.Lock;
 
 /**
  * TwoPhaseLockManager (TPLM) manages locks across distributed Resource Managers (RMs),
@@ -28,7 +31,7 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
     String pendingLocksPath;
     String locksHeldPath;
 
-    private final ReliableNodeManager rnm;
+    private final IReliableNodeManagerTPLM rnm;
     private final Channel rabbitChannel;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -50,6 +53,9 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
             Connection connection = factory.newConnection();
             rabbitChannel = connection.createChannel();
             LOG.info("RabbitMQ session established.");
+
+            ReliableNodeManagerTPLMService rnmService = new ReliableNodeManagerTPLMService();
+            rnm = rnmService.getReliableNodeManagerTPLMPort();
         } catch (Exception e) {
             LOG.log(System.Logger.Level.ERROR, "TwoPhaseLockManager instantiation error occurred with:", e);
             throw new RuntimeException(e);
@@ -142,7 +148,7 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
 
             if (canGrantAll(pendingLocks)) {
                 holdLocks(txnID, pendingLocks);
-                rnm.removePendingRequest(txnID);
+                rnm.removePendingRequest(pendingPath, txnID);
                 sendLockGrantedMessage(txnID);
             }
         }
@@ -164,7 +170,7 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
             List<String> inactiveRMs = new ArrayList<>();
 
             for (Lock lock : requestedLocks) {
-                if (!rnm.checkRmStatus(path, lock.vectorId)) {
+                if (!rnm.checkRmStatus(lock.vectorId)) {
                     inactiveRMs.add(lock.vectorId);
                 }
             }
@@ -197,8 +203,7 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
             if (heldLocks == null || heldLocks.isEmpty()) return;
 
             for (Lock lock : heldLocks) {
-                rnm.clearHolder(basePath + "/" + lock.vectorId + "/" + lock.element + "/holder";,
-                lock.vectorId, lock.element); // Free the lock
+                rnm.clearHolder(basePath + "/" + lock.vectorId + "/" + lock.element + "/holder", lock.vectorId, lock.element); // Free the lock
                 checkPendingRequests(lock.vectorId, lock.element);
             }
 

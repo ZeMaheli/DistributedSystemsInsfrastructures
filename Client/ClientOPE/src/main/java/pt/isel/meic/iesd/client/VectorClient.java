@@ -3,16 +3,14 @@ package pt.isel.meic.iesd.client;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.data.Stat;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerCl;
+import pt.isel.meic.iesd.rnm.ReliableNodeManagerClService;
 import pt.isel.meic.iesd.vs.VectorService;
 import pt.isel.meic.iesd.vs.IVector;
 import pt.isel.meic.iesd.tm.ITransaction;
@@ -23,8 +21,6 @@ import javax.xml.namespace.QName;
 public class VectorClient {
     private static final String RABBITMQ_HOST = "localhost";
     private Channel rabbitChannel;
-    private ZooKeeper zk;
-    private static final String ZK_HOST = "0.0.0.0";
 
     public static void main(String[] args) {
         if (args.length < 5) {
@@ -67,8 +63,6 @@ public class VectorClient {
             factory.setHost(RABBITMQ_HOST);
             Connection rabbitConnection = factory.newConnection();
             rabbitChannel = rabbitConnection.createChannel();
-            // Setup zookeeper
-            zk = new ZooKeeper(ZK_HOST, 3000, event -> {});
         } catch (Exception e) {
             System.exit(1);
         }
@@ -78,8 +72,8 @@ public class VectorClient {
         // TODO - Update this
         TPLM tplm = new TPLM();
         //IVector port = service.getVectorPort();
-        Lock lock1 = new Lock("vec" + v1, pos1);
-        Lock lock2 = new Lock("vec" + v2, pos2);
+        Lock lock1 = new Lock(v1, pos1);
+        Lock lock2 = new Lock(v2, pos2);
         port.get_locks(txnID, List.of(lock1, lock2));
     }
 
@@ -118,19 +112,9 @@ public class VectorClient {
         return vectorService.getVectorPort();
     }
 
-    public String getVectorServiceUrl(String vectorID) throws KeeperException, InterruptedException {
-        String rmPath = "/resource-managers/rm" + vectorID;
-
-        // Fetch the 'url' znode for the given vectorID
-        String urlPath = rmPath + "/url";
-        Stat stat = new Stat();
-        byte[] data = zk.getData(urlPath, false, stat);
-
-        if (data != null) {
-            // Data is a simple string with the URL
-            return new String(data, StandardCharsets.UTF_8);
-        } else {
-            throw new IllegalArgumentException("No URL found for vectorID: " + vectorID);
-        }
+    public String getVectorServiceUrl(String vectorID) throws Exception {
+        ReliableNodeManagerClService rnmService = new ReliableNodeManagerClService();
+        IReliableNodeManagerCl rnm = rnmService.getReliableNodeManagerClPort();
+        return rnm.getVectorServiceUrl(vectorID);
     }
 }
