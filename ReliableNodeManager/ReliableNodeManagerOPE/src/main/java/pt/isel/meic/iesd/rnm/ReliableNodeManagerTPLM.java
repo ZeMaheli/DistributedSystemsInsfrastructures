@@ -47,11 +47,15 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
 
     @Override
     public String getHolder(String path, String vectorId, int element) throws Exception {
-        byte[] data = zooKeeper.getData(path, false, null);
-        if (data != null) {
-            return new String(data, StandardCharsets.UTF_8);
+        try {
+            byte[] data = zooKeeper.getData(path, false, null);
+            if (data != null) {
+                return new String(data, StandardCharsets.UTF_8);
+            }
+            return null;
+        } catch (KeeperException.NoNodeException e) {
+            return null;
         }
-        return null;
     }
 
     @Override
