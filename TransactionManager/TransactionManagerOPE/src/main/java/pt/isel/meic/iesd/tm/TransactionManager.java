@@ -23,6 +23,7 @@ public class TransactionManager implements ITransaction {
     @Override
     public String commit(int transactionID) {
         Transaction transaction = transactionService.getTransaction(transactionID);
+        if (transaction.getResources().isEmpty()) return "NO_RESOURCES";
         try {
             ArrayList<IXA> xaManagers = new ArrayList<>();
             boolean prepared = true;
@@ -37,22 +38,24 @@ public class TransactionManager implements ITransaction {
                 }
             }
             boolean failed = false;
-            for (IXA xaManager : xaManagers) {
-                if (prepared) {
+            if (prepared) {
+                for (IXA xaManager : xaManagers) {
                     if (!xaManager.commit(transactionID)) {
                         failed = true;
                         break;
                     }
-                } else {
-                    xaManager.rollback(transactionID);
                 }
             }
-            if (failed) {
+            boolean invalid_state = false;
+            if (!prepared || failed) {
                 for (IXA xaManager : xaManagers) {
-                    xaManager.rollback(transactionID);
+                    if (!xaManager.rollback(transactionID)) {
+                        invalid_state = true;
+                    }
                 }
-            }
-            if (failed || !prepared) {
+                if (!invalid_state) {
+                    return "ROLLED_BACK";
+                }
                 return "FAILED";
             }
             return "SUCCESS";
@@ -63,8 +66,8 @@ public class TransactionManager implements ITransaction {
 
     @Override
     public String rollback(int transactionID) {
-
         Transaction transaction = transactionService.getTransaction(transactionID);
+        if (transaction.getResources().isEmpty()) return "NO_RESOURCES";
         try {
             ArrayList<IXA> xaManagers = new ArrayList<>();
             boolean prepared = true;
@@ -78,16 +81,17 @@ public class TransactionManager implements ITransaction {
                     break;
                 }
             }
+            if (!prepared) return "FAILED";
             boolean rolled = true;
             for (IXA xaManager : xaManagers) {
-                if (xaManager.rollback(transactionID)) {
+                if (!xaManager.rollback(transactionID)) {
                     rolled = false;
                 }
             }
             if (!rolled) {
                 return "FAILED";
             }
-            return "SUCCESS";
+            return "ROLLED_BACK";
         } catch (MalformedURLException e) {
             return "FAILED";
         }
