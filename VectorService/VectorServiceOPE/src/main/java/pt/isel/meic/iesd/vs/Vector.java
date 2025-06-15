@@ -40,6 +40,7 @@ public class Vector implements IVector {
     public void applyWrite(int pos, int value) {
         System.out.println("Vector: Applying write value " + value + " at pos " + pos);
         vector.set(pos, value);
+        System.out.println("vector: " + vector);
     }
 
     // ATTENTION: The variance should only be returned on a valid state.

@@ -29,4 +29,3 @@ public class XaManager implements IXA {
         return resourceManager.rollback(transactionID);
     }
 }
-

@@ -63,6 +63,7 @@ public class VectorClient {
             // Setup RabbitMQ
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(RABBITMQ_HOST);
+            factory.setPort(5672);
             Connection rabbitConnection = factory.newConnection();
             rabbitChannel = rabbitConnection.createChannel();
         } catch (Exception e) {

@@ -36,7 +36,9 @@ public class TransactionManager implements ITransaction {
             boolean prepared = true;
             for (Resource resource : transaction.getResources()) {
                 IXA xaManager = xaRepository.getManager(resource);
+                System.out.println("PREPARING");
                 if (xaManager.prepare(transactionID)) {
+                    System.out.println("PREPARED");
                     xaManagers.add(xaManager);
                 } else {
                     prepared = false;
@@ -46,7 +48,11 @@ public class TransactionManager implements ITransaction {
             boolean failed = false;
             if (prepared) {
                 for (IXA xaManager : xaManagers) {
-                    if (!xaManager.commit(transactionID)) {
+                    System.out.println("COMITTING");
+                    boolean committed = xaManager.commit(transactionID);
+                    if (committed) {
+                        System.out.println("COMITTED");
+                    } else {
                         failed = true;
                         break;
                     }

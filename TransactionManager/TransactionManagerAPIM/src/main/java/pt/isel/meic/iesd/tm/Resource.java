@@ -4,6 +4,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @XmlRootElement(name = "Resource")
 public class Resource implements Serializable {
@@ -42,4 +43,19 @@ public class Resource implements Serializable {
     public void setPort(int port) {
         this.port = port;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Resource that)) return false;
+        return id == that.id &&
+                port == that.port &&
+                Objects.equals(hostname, that.hostname);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, hostname, port);
+    }
+
 }

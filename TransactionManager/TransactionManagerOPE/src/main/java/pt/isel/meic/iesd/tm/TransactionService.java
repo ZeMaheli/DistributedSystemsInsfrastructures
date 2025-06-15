@@ -22,6 +22,7 @@ public class TransactionService {
     public void registerResourceManager(int transactionID, Resource resource) {
         Transaction transaction = transactionRepository.getTransaction(transactionID);
         if (transaction == null) return;
+        if (transaction.getResources().contains(resource)) return;
         transaction.addResource(resource);
         transactionRepository.storeTransaction(transaction);
     }

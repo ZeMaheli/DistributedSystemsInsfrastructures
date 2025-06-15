@@ -49,7 +49,7 @@ public class SiteServer {
         }
         try {
             String zkHost = "0.0.0.0";
-            ZooKeeper zooKeeper = new ZooKeeper(zkHost, 3000, null);
+            ZooKeeper zooKeeper = new ZooKeeper(zkHost, 30000, null);
 
             ReliableNodeManagerTPLM rnmtplm = new ReliableNodeManagerTPLM(zooKeeper);
             ReliableNodeManagerRM rnmrm = new ReliableNodeManagerRM(zooKeeper);

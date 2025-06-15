@@ -15,7 +15,7 @@ public class TransactionRepository implements ITransactionRepository {
 
     public TransactionRepository(String hostname) {
         try {
-            zk = new ZooKeeper(hostname, 3000, null);
+            zk = new ZooKeeper(hostname, 30000, null);
         } catch (IOException e) {
             System.err.println("Unable to connect to zookeeper");
             System.exit(ExitCode.INVALID_ZOOKEEPER_CONNECTION.value());
@@ -50,7 +50,6 @@ public class TransactionRepository implements ITransactionRepository {
             createNode(rmPath);
             transaction.getResources().forEach( r -> {
                 try {
-                    System.out.println("Created rmID path");
                     updateNode(rmPath + "/" + r.id, r.hostname + ":" + r.port);
                 } catch (InterruptedException | KeeperException e) {
                     System.exit(ExitCode.ZOOKEEPER_EXCEPTION.value());
@@ -58,6 +57,8 @@ public class TransactionRepository implements ITransactionRepository {
                 }
             });
 
+            System.out.println("Size: " + transaction.getResources().size());
+            System.out.println("Items: " + transaction.getResources().toString());
             System.out.println("Registered RM at path: " + txPath);
         } catch (InterruptedException | KeeperException e) {
             System.exit(ExitCode.ZOOKEEPER_EXCEPTION.value());
