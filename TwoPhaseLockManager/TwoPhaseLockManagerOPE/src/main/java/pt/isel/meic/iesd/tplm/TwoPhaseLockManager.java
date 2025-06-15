@@ -6,6 +6,10 @@ import com.rabbitmq.client.ConnectionFactory;
 import jakarta.jws.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerTPLM;
+import pt.isel.meic.iesd.rnm.Lock;
+import pt.isel.meic.iesd.rnm.ReliableNodeManagerTPLMService;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -13,9 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
-import pt.isel.meic.iesd.rnm.IReliableNodeManagerTPLM;
-import pt.isel.meic.iesd.rnm.ReliableNodeManagerTPLMService;
-import pt.isel.meic.iesd.rnm.Lock;
 
 /**
  * TwoPhaseLockManager (TPLM) manages locks across distributed Resource Managers (RMs),
@@ -161,16 +162,18 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
         String pendingPath = basePath + "/" + freedVector + "/" + freedPos + "/" + waitingSuffix;
         List<String> pendingTxns = rnm.getPendingTransactions(pendingPath);
 
-        for (String txnID : pendingTxns) {
-            List<Lock> pendingLocks = rnm.getPendingRequest(txnID);
+        String nextTnxID = pendingTxns.get(0);
+        List<Lock> pendingLocks = rnm.getPendingRequest(nextTnxID);
 
-            if (pendingLocks == null) continue;
+        if (pendingLocks == null) {
+            LOGGER.warn("No pending locks found for txnID={}", nextTnxID);
+            return;
+        }
 
-            if (canGrantAll(pendingLocks)) {
-                holdLocks(txnID, pendingLocks);
-                rnm.removePendingRequest(pendingPath, txnID);
-                sendLockRequestMessage(txnID, "LOCK_GRANTED");
-            }
+        if (canGrantAll(pendingLocks)) {
+            holdLocks(nextTnxID, pendingLocks);
+            rnm.removePendingRequest(pendingPath, nextTnxID);
+            sendLockRequestMessage(nextTnxID, "LOCK_GRANTED");
         }
     }
 
