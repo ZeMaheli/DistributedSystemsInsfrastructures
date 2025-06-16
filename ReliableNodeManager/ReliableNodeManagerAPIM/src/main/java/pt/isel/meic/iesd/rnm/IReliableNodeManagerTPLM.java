@@ -13,32 +13,32 @@ public interface IReliableNodeManagerTPLM {
     boolean checkRmStatus(String vectorId);
 
     @WebMethod
-    String getHolder(String path, String vectorId, int element) throws Exception;
+    String getHolder(String vectorId, int element) throws Exception;
 
     @WebMethod
-    void setHolder(String path, String vectorId, int element, String txnID) throws Exception;
+    void setHolder(String vectorId, int element, String txnID) throws Exception;
 
     @WebMethod
     void addLockHeld(String txnID, Lock lock) throws Exception;
 
     @WebMethod
-    List<Lock> getLocksHeld(String path, String txnID) throws Exception;
+    List<Lock> getLocksHeld(String txnID) throws Exception;
 
     @WebMethod
-    List<String> getPendingTransactions(String path);
+    List<String> getPendingTransactions(String vectorId, int element);
 
     @WebMethod
     List<Lock> getPendingRequest(String txnID);
 
     @WebMethod
-    void addPendingRequest(String path, String txnID, List<Lock> locks) throws Exception;
+    void addPendingRequest(String txnID, List<Lock> locks) throws Exception;
 
     @WebMethod
-    void removePendingRequest(String path, String txnID) throws Exception;
+    void removePendingRequest(List<Lock> locks, String txnID) throws Exception;
 
     @WebMethod
-    void clearHolder(String path, String vectorId, int element) throws Exception;
+    void clearHolder(String vectorId, int element) throws Exception;
 
     @WebMethod
-    void clearLocksHeld(String path, String txnID) throws Exception;
+    void clearLocksHeld(String txnID) throws Exception;
 }

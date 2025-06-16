@@ -2,9 +2,6 @@ package pt.isel.meic.iesd.tplm;
 
 import jakarta.xml.ws.Endpoint;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 public class TPLMServer {
     static final String HOSTNAME = "localhost";
     static final String PORT = "3000";
@@ -17,7 +14,7 @@ public class TPLMServer {
      *
      * @param args command line arguments
      */
-    public static void main(String[] args) throws IOException, TimeoutException {
+    public static void main(String[] args) {
         try {
             rabbitMQHost = args[0];
             rabbitMQPort = Integer.parseInt(args[1]);
@@ -30,6 +27,7 @@ public class TPLMServer {
 
         // Publish endpoint
         Endpoint clientEndpoint = Endpoint.create(tplm);
+        System.out.println("Starting TPLM...");
         clientEndpoint.publish("http://" + HOSTNAME + ":" + PORT + "/TPLM");
     }
 

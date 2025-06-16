@@ -74,15 +74,9 @@
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <!-- Alternative less adaptive to changes of AX interface
-                           <wsdlLocation>${basedir}/src/main/resources/jaxws/AX.wsdl</wsdlLocation>
-                            -->
-
-                            <!-- execute java -jar target\TransactionManagerOPE-0.1.0-jar-with-dependencies.jar -->
-                            <wsdlUrls>
-                                <wsdlUrl>http://localhost:2050/RNMTPLM?wsdl</wsdlUrl>
-                            </wsdlUrls>
-
+                            <wsdlFiles>
+                                <wsdlFile>${basedir}/src/main/resources/jaxws/ReliableNodeManagerTPLMService.wsdl</wsdlFile>
+                            </wsdlFiles>
                             <packageName>pt.isel.meic.iesd.rnm</packageName>
                             <sourceDestDir>${basedir}/src/main/java</sourceDestDir>
                         </configuration>

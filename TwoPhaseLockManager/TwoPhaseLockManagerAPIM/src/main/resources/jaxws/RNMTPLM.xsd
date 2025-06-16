@@ -1,0 +1,189 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by XML-WS Runtime (https://github.com/eclipse-ee4j/metro-jax-ws). Runtime's version is XML-WS Runtime 4.0.3 git-revision#a57c222. --><xs:schema xmlns:tns="http://pt.isel.meic.iesd.rnmtplm" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://pt.isel.meic.iesd.rnmtplm">
+
+<xs:element name="Exception" type="tns:Exception"/>
+
+<xs:element name="addLockHeld" type="tns:addLockHeld"/>
+
+<xs:element name="addLockHeldResponse" type="tns:addLockHeldResponse"/>
+
+<xs:element name="addPendingRequest" type="tns:addPendingRequest"/>
+
+<xs:element name="addPendingRequestResponse" type="tns:addPendingRequestResponse"/>
+
+<xs:element name="checkRmStatus" type="tns:checkRmStatus"/>
+
+<xs:element name="checkRmStatusResponse" type="tns:checkRmStatusResponse"/>
+
+<xs:element name="clearHolder" type="tns:clearHolder"/>
+
+<xs:element name="clearHolderResponse" type="tns:clearHolderResponse"/>
+
+<xs:element name="clearLocksHeld" type="tns:clearLocksHeld"/>
+
+<xs:element name="clearLocksHeldResponse" type="tns:clearLocksHeldResponse"/>
+
+<xs:element name="getHolder" type="tns:getHolder"/>
+
+<xs:element name="getHolderResponse" type="tns:getHolderResponse"/>
+
+<xs:element name="getLocksHeld" type="tns:getLocksHeld"/>
+
+<xs:element name="getLocksHeldResponse" type="tns:getLocksHeldResponse"/>
+
+<xs:element name="getPendingRequest" type="tns:getPendingRequest"/>
+
+<xs:element name="getPendingRequestResponse" type="tns:getPendingRequestResponse"/>
+
+<xs:element name="getPendingTransactions" type="tns:getPendingTransactions"/>
+
+<xs:element name="getPendingTransactionsResponse" type="tns:getPendingTransactionsResponse"/>
+
+<xs:element name="removePendingRequest" type="tns:removePendingRequest"/>
+
+<xs:element name="removePendingRequestResponse" type="tns:removePendingRequestResponse"/>
+
+<xs:element name="setHolder" type="tns:setHolder"/>
+
+<xs:element name="setHolderResponse" type="tns:setHolderResponse"/>
+
+<xs:complexType name="getPendingTransactions">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+<xs:element name="arg1" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPendingTransactionsResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getHolder">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+<xs:element name="arg1" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getHolderResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Exception">
+<xs:sequence>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="setHolder">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+<xs:element name="arg1" type="xs:int"/>
+<xs:element name="arg2" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="setHolderResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="getPendingRequest">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPendingRequestResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:lock" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="lock">
+<xs:sequence>
+<xs:element name="vectorId" type="xs:string" minOccurs="0"/>
+<xs:element name="element" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="addPendingRequest">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+<xs:element name="arg1" type="tns:lock" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="addPendingRequestResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="checkRmStatus">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="checkRmStatusResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="clearHolder">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+<xs:element name="arg1" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="clearHolderResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="clearLocksHeld">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="clearLocksHeldResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="addLockHeld">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+<xs:element name="arg1" type="tns:lock" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="addLockHeldResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="getLocksHeld">
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getLocksHeldResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:lock" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="removePendingRequest">
+<xs:sequence>
+<xs:element name="arg0" type="tns:lock" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="arg1" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="removePendingRequestResponse">
+<xs:sequence/>
+</xs:complexType>
+</xs:schema>

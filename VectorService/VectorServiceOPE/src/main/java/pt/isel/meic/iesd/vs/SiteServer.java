@@ -10,7 +10,7 @@ public class SiteServer {
     static final String HOSTNAME = "0.0.0.0"; 
     static final Integer PORT = 2060;
 
-    static final String TM_HOSTNAME = "0.0.0.0";
+    static final String TM_HOSTNAME = "tm";
     static final Integer TM_PORT = 2059;
 
     public static void main(String[] args) {

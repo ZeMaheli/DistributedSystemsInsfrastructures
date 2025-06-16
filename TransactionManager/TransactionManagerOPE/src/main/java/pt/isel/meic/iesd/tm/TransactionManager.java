@@ -27,7 +27,7 @@ public class TransactionManager implements ITransaction {
     }
 
     @Override
-    public String commit(int transactionID) {
+    public String commitTransaction(int transactionID) {
         Transaction transaction = transactionService.getTransaction(transactionID);
         if (transaction.getResources().isEmpty()) return "NO_RESOURCES";
         String txnId = String.valueOf(transactionID);
@@ -49,10 +49,8 @@ public class TransactionManager implements ITransaction {
             if (prepared) {
                 for (IXA xaManager : xaManagers) {
                     System.out.println("COMITTING");
-                    boolean committed = xaManager.commit(transactionID);
-                    if (committed) {
-                        System.out.println("COMITTED");
-                    } else {
+                    if (!xaManager.commit(transactionID)) {
+                        System.out.println("COMITTING FAILED");
                         failed = true;
                         break;
                     }
@@ -79,7 +77,7 @@ public class TransactionManager implements ITransaction {
     }
 
     @Override
-    public String rollback(int transactionID) {
+    public String rollbackTransaction(int transactionID) {
         Transaction transaction = transactionService.getTransaction(transactionID);
         if (transaction.getResources().isEmpty()) return "NO_RESOURCES";
         try {

@@ -21,5 +21,6 @@
         <module>TwoPhaseLockManager</module>
         <module>VectorService</module>
         <module>Client</module>
+        <module>ReliableNodeManager</module>
     </modules>
 </project>

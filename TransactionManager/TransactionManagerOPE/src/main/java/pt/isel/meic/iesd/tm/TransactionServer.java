@@ -6,15 +6,12 @@ public class TransactionServer {
     private static  final String HOSTNAME = "0.0.0.0";
     private static final Integer PORT = 2059;
 
-    private static final String ZK_HOST = "0.0.0.0";
+    private static final String ZK_HOST = System.getenv("ZOOKEEPER_HOST");
 
     public static void main(String[] args) {
         String hostname = HOSTNAME;
-        String zkHost = ZK_HOST;
         int port = PORT;
         switch (args.length) {
-            case 3:
-                zkHost = args[2];
             case 2:
                 try {
                     port = Integer.parseInt(args[1]);
@@ -26,7 +23,7 @@ public class TransactionServer {
                 hostname = args[0];
         }
 
-        TransactionRepository transactionRepository = new TransactionRepository(zkHost);
+        TransactionRepository transactionRepository = new TransactionRepository(ZK_HOST);
         TransactionService transactionService = new TransactionService(transactionRepository);
         XaRepository xaRepository = new XaRepository();
 

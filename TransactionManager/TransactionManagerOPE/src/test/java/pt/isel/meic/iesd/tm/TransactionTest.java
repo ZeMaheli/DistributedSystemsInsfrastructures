@@ -36,7 +36,7 @@ public class TransactionTest {
 
         // Test
         int transactionID = transactionManager.begin();
-        assertEquals("SUCCESS", transactionManager.commit(transactionID));
+        assertEquals("SUCCESS", transactionManager.commitTransaction(transactionID));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class TransactionTest {
 
         // Test
         int transactionID = transactionManager.begin();
-        assertEquals("ROLLED_BACK", transactionManager.commit(transactionID));
+        assertEquals("ROLLED_BACK", transactionManager.commitTransaction(transactionID));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class TransactionTest {
 
         // Test
         int transactionID = transactionManager.begin();
-        assertEquals("ROLLED_BACK", transactionManager.commit(transactionID));
+        assertEquals("ROLLED_BACK", transactionManager.commitTransaction(transactionID));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class TransactionTest {
 
         // Test
         int transactionID = transactionManager.begin();
-        assertEquals("FAILED", transactionManager.commit(transactionID));
+        assertEquals("FAILED", transactionManager.commitTransaction(transactionID));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class TransactionTest {
 
         // Test
         int transactionID = transactionManager.begin();
-        assertEquals("ROLLED_BACK", transactionManager.rollback(transactionID));
+        assertEquals("ROLLED_BACK", transactionManager.rollbackTransaction(transactionID));
     }
 
     @Test
@@ -95,6 +95,6 @@ public class TransactionTest {
 
         // Test
         int transactionID = transactionManager.begin();
-        assertEquals("FAILED", transactionManager.rollback(transactionID));
+        assertEquals("FAILED", transactionManager.rollbackTransaction(transactionID));
     }
 }

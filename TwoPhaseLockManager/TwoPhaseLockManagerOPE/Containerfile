@@ -1,0 +1,11 @@
+# obtain the base Linux image with Java runtime
+FROM eclipse-temurin:21-jre-jammy
+
+# Place java executable at /usr/app
+COPY ./target/TwoPhaseLockManagerOPE-1.0-SNAPSHOT-jar-with-dependencies.jar /usr/app/
+
+# The listening port
+EXPOSE 3000
+
+# Starts the TwoPhaseLockManager service
+CMD ["java","-jar","/usr/app/TwoPhaseLockManagerOPE-1.0-SNAPSHOT-jar-with-dependencies.jar", "rabbitmq", "5672"]

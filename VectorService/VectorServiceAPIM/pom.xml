@@ -52,15 +52,9 @@
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <!-- Alternative less adaptive to changes of AX interface
-                           <wsdlLocation>${basedir}/src/main/resources/jaxws/AX.wsdl</wsdlLocation>
-                            -->
-
-                            <!-- execute java -jar target\TransactionManagerOPE-0.1.0-jar-with-dependencies.jar -->
-                            <wsdlUrls>
-                                <wsdlUrl>http://localhost:2059/AX?wsdl</wsdlUrl>
-                            </wsdlUrls>
-
+                            <wsdlFiles>
+                                <wsdlFile>${basedir}/src/main/resources/jaxws/AxManagerService.wsdl</wsdlFile>
+                            </wsdlFiles>
                             <packageName>pt.isel.meic.iesd.tm</packageName>
                             <sourceDestDir>${basedir}/src/main/java</sourceDestDir>
                         </configuration>

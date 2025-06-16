@@ -1,0 +1,11 @@
+# obtain the base Linux image with Java runtime
+FROM eclipse-temurin:21-jre-jammy
+
+# Place java executable at /usr/app
+COPY ./target/ReliableNodeManagerOPE-0.1.0-jar-with-dependencies.jar /usr/app/
+
+# The listening port
+EXPOSE 2050 2051 2052
+
+# Starts the ReliableNodeManager service
+CMD ["java","-jar","/usr/app/ReliableNodeManagerOPE-0.1.0-jar-with-dependencies.jar", "0.0.0.0", "2050", "2051", "2052"]]

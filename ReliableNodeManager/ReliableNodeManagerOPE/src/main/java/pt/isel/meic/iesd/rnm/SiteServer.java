@@ -10,45 +10,53 @@ public class SiteServer {
     static final Integer PORTrnmcl = 2052;
 
     public static void main(String[] args) {
-        String hostname = HOSTNAME;
-        int port1 = PORTrnmtplm;
-        int port2 = PORTrnmrm;
-        int port3 = PORTrnmcl;
-        switch (args.length) {
-            case 4:
-                try {
-                    port3 = Integer.parseInt(args[3]);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid parameter PORT");
-                    System.exit(1);
-                    return;
-                }
-            case 3:
-                try {
-                    port2 = Integer.parseInt(args[2]);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid parameter PORT");
-                    System.exit(1);
-                    return;
-                }
-            case 2:
-                try {
-                    port1 = Integer.parseInt(args[1]);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid parameter PORT");
-                    System.exit(1);
-                    return;
-                }
-            case 1:
-                hostname = args[0];
-                break;
-            case 0:
-                break;
-            default:
-                return;
-        }
         try {
-            String zkHost = "0.0.0.0";
+            System.out.println("Starting SiteServer main method...");
+            String hostname = HOSTNAME;
+            int port1 = PORTrnmtplm;
+            int port2 = PORTrnmrm;
+            int port3 = PORTrnmcl;
+
+            String zkHost = System.getenv("ZOOKEEPER_HOST");
+            System.out.println("zkHost: " + zkHost);
+            if (zkHost == null || zkHost.isEmpty()) {
+                System.err.println("Zookeeper host not configured.");
+                System.exit(1);
+            }
+
+            switch (args.length) {
+                case 4:
+                    try {
+                        port3 = Integer.parseInt(args[3]);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid parameter PORT");
+                        System.exit(1);
+                        return;
+                    }
+                case 3:
+                    try {
+                        port2 = Integer.parseInt(args[2]);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid parameter PORT");
+                        System.exit(1);
+                        return;
+                    }
+                case 2:
+                    try {
+                        port1 = Integer.parseInt(args[1]);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid parameter PORT");
+                        System.exit(1);
+                        return;
+                    }
+                case 1:
+                    hostname = args[0];
+                    break;
+                case 0:
+                    break;
+                default:
+                    return;
+            }
             ZooKeeper zooKeeper = new ZooKeeper(zkHost, 30000, null);
 
             ReliableNodeManagerTPLM rnmtplm = new ReliableNodeManagerTPLM(zooKeeper);

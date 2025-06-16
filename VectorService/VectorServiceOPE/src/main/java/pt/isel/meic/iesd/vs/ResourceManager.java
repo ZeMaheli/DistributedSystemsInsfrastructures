@@ -72,7 +72,6 @@ public class ResourceManager implements IResourceManager {
                 vector.applyWrite(entry.getKey(), entry.getValue());
             }
         }
-        System.out.println("Returning true to commit");
         return true;
     }
 

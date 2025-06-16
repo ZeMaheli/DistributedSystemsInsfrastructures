@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by XML-WS Runtime (https://github.com/eclipse-ee4j/metro-jax-ws). Runtime's version is XML-WS Runtime 4.0.3 git-revision#a57c222. --><xs:schema xmlns:tns="http://pt.isel.meic.iesd.tm.xa" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://pt.isel.meic.iesd.tm.xa">
+
+<xs:element name="commit" type="tns:commit"/>
+
+<xs:element name="commitResponse" type="tns:commitResponse"/>
+
+<xs:element name="prepare" type="tns:prepare"/>
+
+<xs:element name="prepareResponse" type="tns:prepareResponse"/>
+
+<xs:element name="rollback" type="tns:rollback"/>
+
+<xs:element name="rollbackResponse" type="tns:rollbackResponse"/>
+
+<xs:complexType name="commit">
+<xs:sequence>
+<xs:element name="arg0" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="commitResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="prepare">
+<xs:sequence>
+<xs:element name="arg0" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="prepareResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="rollback">
+<xs:sequence>
+<xs:element name="arg0" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="rollbackResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

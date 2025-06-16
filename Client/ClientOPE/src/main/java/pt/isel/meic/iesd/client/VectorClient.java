@@ -2,6 +2,7 @@ package pt.isel.meic.iesd.client;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -19,55 +20,111 @@ import pt.isel.meic.iesd.tm.TransactionManagerService;
 import javax.xml.namespace.QName;
 
 public class VectorClient {
-    private static final String RABBITMQ_HOST = "localhost";
+    private static final String RABBITMQ_HOST = "rabbitmq";
     private Channel rabbitChannel;
+    private Connection rabbitConnection;
+
+    private ITransaction tmPort;
 
     public static void main(String[] args) {
-        if (args.length < 5) {
-            System.err.println("Usage: VectorClient <v1ID> <pos1> <v2ID> <pos2> <amount>");
-            System.exit(1);
-        }
-        String v1 = args[0];
-        int pos1 = Integer.parseInt(args[1]);
-        String v2 = args[2];
-        int pos2 = Integer.parseInt(args[3]);
-        int amount = Integer.parseInt(args[4]);
-
+        Scanner scanner = new Scanner(System.in);
         VectorClient cl = new VectorClient();
         cl.setup();
 
-        TransactionManagerService tm = new TransactionManagerService();
-        ITransaction tmPort = tm.getTransactionManagerPort();
+        if (args.length >= 5) {
+            // Run a single transaction from args
+            String v1 = args[0];
+            int pos1 = Integer.parseInt(args[1]);
+            String v2 = args[2];
+            int pos2 = Integer.parseInt(args[3]);
+            int amount = Integer.parseInt(args[4]);
+            cl.executeTransaction(v1, pos1, v2, pos2, amount);
+            cl.close();
+            return;
+        }
 
-        int txnID = tmPort.begin();
+        System.out.println("Enter transactions in format: <v1ID> <pos1> <v2ID> <pos2> <amount>");
+        System.out.println("Type 'exit' to quit");
 
+        while (true) {
+            System.out.print("> ");
+            String line = scanner.nextLine().trim();
+            if (line.equalsIgnoreCase("exit")) break;
+
+            String[] tokens = line.split("\\s+");
+            if (tokens.length < 5) {
+                System.out.println("Invalid input. Please provide 5 values.");
+                continue;
+            }
+
+            try {
+                String v1 = tokens[0];
+                int pos1 = Integer.parseInt(tokens[1]);
+                String v2 = tokens[2];
+                int pos2 = Integer.parseInt(tokens[3]);
+                int amount = Integer.parseInt(tokens[4]);
+
+                cl.executeTransaction(v1, pos1, v2, pos2, amount);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number format.");
+            }
+        }
+
+        cl.close();
+    }
+
+    public boolean executeTransaction(String v1, int pos1, String v2, int pos2, int amount) {
+        int txnID = -1;
         try {
-            cl.sendLocksRequest(txnID, v1, pos1, v2, pos2);
+            txnID = tmPort.begin();
+            sendLocksRequest(txnID, v1, pos1, v2, pos2);
             // Block until message arrives
-            cl.listenForLockReply(txnID);
+            listenForLockReply(txnID);
 
             // Do read/write on vectors
-            cl.vectorOperations(txnID, v1, pos1, v2, pos2, amount);
+            vectorOperations(txnID, v1, pos1, v2, pos2, amount);
 
-            System.out.println("Will be asking for commit");
-
-            String reply = tmPort.commit(txnID);
-            System.out.println(reply);
+            String reply = tmPort.commitTransaction(txnID);
+            System.out.println("Committed txn " + txnID + ": " + reply);
+            return true;
         } catch (Exception e) {
-            tmPort.rollback(txnID);
+            System.out.println("Transaction failed: " + e.getMessage());
+            if (txnID != -1) {
+                try {
+                    tmPort.rollbackTransaction(txnID);
+                } catch (Exception rollbackEx) {
+                    System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                }
+            }
+            return false;
         }
     }
 
-    private void setup() {
+    public void setup() {
         try {
+            TransactionManagerService tm = new TransactionManagerService();
+            tmPort = tm.getTransactionManagerPort();
             // Setup RabbitMQ
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(RABBITMQ_HOST);
             factory.setPort(5672);
-            Connection rabbitConnection = factory.newConnection();
+            rabbitConnection = factory.newConnection();
             rabbitChannel = rabbitConnection.createChannel();
         } catch (Exception e) {
             System.exit(1);
+        }
+    }
+
+    public void close() {
+        try {
+            if (rabbitChannel != null && rabbitChannel.isOpen()) {
+                rabbitChannel.close();
+            }
+            if (rabbitConnection != null && rabbitConnection.isOpen()) {
+                rabbitConnection.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

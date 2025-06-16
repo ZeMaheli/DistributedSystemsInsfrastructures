@@ -8,25 +8,50 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import static java.util.Collections.emptyList;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.rnm.IReliableNodeManagerTPLM")
 public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     private final ZooKeeper zooKeeper;
-    private final String basePath;
-    private final String locksHeldPath;
-    private final String pendingLocksPath;
+    private String basePath;
+    private String locksHeldPath;
+    private String pendingLocksPath;
+    private String holderSuffix;
+    private String waitingSuffix;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ReliableNodeManagerTPLM(ZooKeeper zk) {
         this.zooKeeper = zk;
-        this.basePath = "/locks";
-        this.locksHeldPath = "/locks_held";
-        this.pendingLocksPath = "/locks_pending";
+        loadConfig();
+    }
+
+    /**
+     * Loads Zookeeper configuration properties from the `zookeeper.properties` file.
+     *
+     * @throws RuntimeException if the configuration cannot be loaded.
+     */
+    private void loadConfig() {
+        System.out.println("Loading zookeeper configuration...");
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("zookeeper.properties")) {
+            Properties prop = new Properties();
+            if (input == null) {
+                throw new RuntimeException("Unable to find zookeeper.properties");
+            }
+            prop.load(input);
+            basePath = prop.getProperty("locks.base_path");
+            holderSuffix = prop.getProperty("locks.holder_suffix");
+            waitingSuffix = prop.getProperty("locks.waiting_suffix");
+            pendingLocksPath = prop.getProperty("locks.pending_base_path");
+            locksHeldPath = prop.getProperty("locks.held_base_path");
+        } catch (Exception ex) {
+            System.out.println("Error loading zookeeper configuration");
+        }
     }
 
     @Override
@@ -46,7 +71,8 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     }
 
     @Override
-    public String getHolder(String path, String vectorId, int element) throws Exception {
+    public String getHolder(String vectorId, int element) throws Exception {
+        String path = basePath + "/" + vectorId + "/" + element + holderSuffix;
         try {
             byte[] data = zooKeeper.getData(path, false, null);
             if (data != null) {
@@ -59,16 +85,17 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     }
 
     @Override
-    public void setHolder(String path, String vectorId, int element, String txnID) throws Exception {
-        ensurePathExists(path);
-        zooKeeper.setData(path, txnID.getBytes(StandardCharsets.UTF_8), -1);
+    public void setHolder(String vectorId, int element, String txnID) throws Exception {
+        String holderPath = basePath + "/" + vectorId + "/" + element + holderSuffix;
+        ensurePathExists(holderPath);
+        zooKeeper.setData(holderPath, txnID.getBytes(StandardCharsets.UTF_8), -1);
     }
 
     @Override
     public void addLockHeld(String txnID, Lock lock) throws Exception {
         String lockHeldPath = locksHeldPath + "/" + txnID;
         ensurePathExists(lockHeldPath);
-        List<Lock> heldLocks = getLocksHeld(lockHeldPath, txnID); // Get the current list of locks
+        List<Lock> heldLocks = getLocksHeld(txnID); // Get the current list of locks
 
         // Add the new lock to the list
         heldLocks.add(lock);
@@ -81,8 +108,8 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     }
 
     @Override
-    public List<Lock> getLocksHeld(String path, String txnID) throws Exception {
-        String locksHeldTxnPath = path + "/" + txnID;
+    public List<Lock> getLocksHeld(String txnID) throws Exception {
+        String locksHeldTxnPath = locksHeldPath + "/" + txnID;
 
         // Ensure the path exists (if the path does not exist, return an empty list)
         if (zooKeeper.exists(locksHeldTxnPath, false) == null) {
@@ -99,23 +126,24 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     }
 
     @Override
-    public List<String> getPendingTransactions(String path) {
+    public List<String> getPendingTransactions(String vectorId, int element) {
+        String pendingPath = basePath + "/" + vectorId + "/" + element + waitingSuffix;
         try {
-            if (zooKeeper.exists(path, false) == null) {
+            if (zooKeeper.exists(pendingPath, false) == null) {
                 // No pending transactions if path doesn't exist
                 return emptyList();
             }
 
-            byte[] data = zooKeeper.getData(path, false, null);
+            byte[] data = zooKeeper.getData(pendingPath, false, null);
 
             if (data == null || data.length == 0) {
                 return emptyList();
             }
 
             // Deserialize JSON array (e.g., ["txID", "txID1"]) into List<String>
-            return objectMapper.readValue(data, new TypeReference<List<String>>() {});
+            return objectMapper.readValue(data, new TypeReference<>() {});
         } catch (Exception e) {
-            System.out.println("Failed to retrieve pending transactions from path: " + path);
+            System.out.println("Failed to retrieve pending transactions from path: " + pendingPath);
             return emptyList();
         }
     }
@@ -125,12 +153,13 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
         List<Lock> locks = new ArrayList<>();
 
         // Check the /locks_pending/{txnID} path for the locks the txnID is requesting
-        String pendingPath = basePath + "/locks_pending/" + txnID;
+        String pendingPath = pendingLocksPath + "/" + txnID;
 
         try {
             byte[] data = zooKeeper.getData(pendingPath, false, null);
             if (data != null && data.length > 0) {
-                List<Lock> pendingLocks = objectMapper.readValue(data, new TypeReference<List<Lock>>() {});
+                List<Lock> pendingLocks = objectMapper.readValue(data, new TypeReference<>() {
+                });
                 locks.addAll(pendingLocks);
             }
         } catch (Exception e) {
@@ -142,30 +171,73 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     }
 
     @Override
-    public void addPendingRequest(String path, String txnID, List<Lock> locks) throws Exception {
-        String pendingPath = path + "/" + txnID;
-
+    public void addPendingRequest(String txnID, List<Lock> locks) throws Exception {
         try {
-            byte[] data = objectMapper.writeValueAsBytes(locks);
-            ensurePathExists(pendingPath);
-            zooKeeper.setData(pendingPath, data, -1);
+            writeToPendingLocksPath(txnID, locks);
+            writeToIndividualWaitingPaths(txnID, locks);
         } catch (Exception e) {
             throw new Exception("Failed to add pending request for txnID=" + txnID, e);
         }
     }
 
+    private void writeToPendingLocksPath(String txnID, List<Lock> locks) throws Exception {
+        String pendingPath = pendingLocksPath + "/" + txnID;
+
+        byte[] data = objectMapper.writeValueAsBytes(locks);
+        ensurePathExists(pendingPath);
+        zooKeeper.setData(pendingPath, data, -1);
+    }
+
+    private void writeToIndividualWaitingPaths(String txnID, List<Lock> locks) throws Exception {
+        for (Lock lock : locks) {
+            String waitingPath = basePath + "/" + lock.vectorId + "/" + lock.element + waitingSuffix;
+            List<String> txnList = new ArrayList<>();
+
+            if (zooKeeper.exists(waitingPath, false) != null) {
+                byte[] waitingData = zooKeeper.getData(waitingPath, false, null);
+                if (waitingData != null && waitingData.length > 0) {
+                    txnList = objectMapper.readValue(waitingData, new TypeReference<>() {});
+                }
+            } else {
+                ensurePathExists(waitingPath);
+            }
+
+            if (!txnList.contains(txnID)) {
+                txnList.add(txnID);
+                byte[] updatedData = objectMapper.writeValueAsBytes(txnList);
+                zooKeeper.setData(waitingPath, updatedData, -1);
+            }
+        }
+    }
+
     @Override
-    public void removePendingRequest(String path, String txnID) throws Exception {
+    public void removePendingRequest(List<Lock> locks, String txnID) throws Exception {
         String pendingPath = pendingLocksPath + "/" + txnID;
 
         try {
-            if (zooKeeper.exists(path, false) != null) {
-                // If the node exists, delete it to clear the lock holder
-                zooKeeper.delete(path, -1);
+            for (Lock lock: locks) {
+                String waitingPath = basePath + "/" + lock.vectorId + "/" + lock.element + waitingSuffix;
+
+                // Remove txnID from the waiting list
+                if (zooKeeper.exists(waitingPath, false) != null) {
+                    byte[] data = zooKeeper.getData(waitingPath, false, null);
+                    List<String> txnList = new ArrayList<>();
+                    if (data != null && data.length > 0) {
+                        txnList = objectMapper.readValue(data, new TypeReference<>() {});
+                    }
+                    txnList.removeIf(t -> t.equals(txnID));
+
+                    if (txnList.isEmpty()) {
+                        zooKeeper.delete(waitingPath, -1);
+                    } else {
+                        byte[] updatedData = objectMapper.writeValueAsBytes(txnList);
+                        zooKeeper.setData(waitingPath, updatedData, -1);
+                    }
+                }
             }
-            // Check if the pending path exists
+
+            // Remove txnID from locks_pending
             if (zooKeeper.exists(pendingPath, false) != null) {
-                // If it exists, delete the node for the given transaction ID
                 zooKeeper.delete(pendingPath, -1);
             }
         } catch (Exception e) {
@@ -174,11 +246,14 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     }
 
     @Override
-    public void clearHolder(String path, String vectorId, int element) throws Exception {
+    public void clearHolder(String vectorId, int element) throws Exception {
+        String path = basePath + "/" + vectorId + "/" + element + holderSuffix;
+        System.out.println("Clearing holder for path: " + path);
         try {
             // Check if the node exists before deleting it
             if (zooKeeper.exists(path, false) != null) {
                 // If the node exists, delete it to clear the lock holder
+                System.out.println("Cleared holder for path: " + path);
                 zooKeeper.delete(path, -1);
             }
         } catch (KeeperException | InterruptedException e) {
@@ -187,14 +262,15 @@ public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
     }
 
     @Override
-    public void clearLocksHeld(String path, String txnID) throws Exception {
-        String locksHeldPath = path + "/" + txnID;
-
+    public void clearLocksHeld(String txnID) throws Exception {
+        String path = locksHeldPath + "/" + txnID;
+        System.out.println("Clearing locks held for path: " + path);
         try {
             // Check if the node exists for the txnID
-            if (zooKeeper.exists(locksHeldPath, false) != null) {
+            if (zooKeeper.exists(path, false) != null) {
+                System.out.println("Cleared locks held for path: " + path);
                 // Delete the txnID's lock record from locks_held
-                zooKeeper.delete(locksHeldPath, -1);
+                zooKeeper.delete(path, -1);
             }
         } catch (KeeperException | InterruptedException e) {
             throw new Exception("Failed to clear all locks held by txnID=" + txnID, e);

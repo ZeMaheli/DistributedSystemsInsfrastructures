@@ -13,9 +13,9 @@ public interface ITransaction {
     int begin();
 
     @WebMethod
-    String commit(int transactionID);
+    String commitTransaction(int transactionID);
 
     @WebMethod
-    String rollback(int transactionID);
+    String rollbackTransaction(int transactionID);
 
 }
