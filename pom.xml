@@ -22,5 +22,6 @@
         <module>VectorService</module>
         <module>Client</module>
         <module>ReliableNodeManager</module>
+        <module>Zookeeper</module>
     </modules>
 </project>

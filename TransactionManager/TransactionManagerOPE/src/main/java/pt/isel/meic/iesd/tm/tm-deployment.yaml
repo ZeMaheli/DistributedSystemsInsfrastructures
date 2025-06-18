@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tm
+  template:
+    metadata:
+      labels:
+        app: tm
+    spec:
+      containers:
+        - name: tm
+          image: tm:latest
+          ports:
+            - containerPort: 2059
+          env:
+            - name: ZOOKEEPER_HOST
+              value: "zookeeper:2181"

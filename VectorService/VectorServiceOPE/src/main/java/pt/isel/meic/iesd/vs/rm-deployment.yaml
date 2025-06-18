@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rm
+  template:
+    metadata:
+      labels:
+        app: rm
+    spec:
+      containers:
+        - name: rm
+          image: rm:latest
+          args: ["1", "0.0.0.0", "2060"]  # <ID> <HOSTNAME> <PORT>
+          ports:
+            - containerPort: 2060
+          env:
+            - name: TM_HOSTNAME
+              value: "tm"
+            - name: TM_PORT
+              value: "2059"

@@ -1,8 +1,15 @@
-# obtain the base Linux image with Java runtime
+# Stage 1: Build the Java project with Maven
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
+WORKDIR /VS
+COPY . .
+RUN mvn clean package
+
+# Stage 2: Create a minimal runtime image
 FROM eclipse-temurin:21-jre-jammy
+WORKDIR /usr/app
 
 # Place java executable at /usr/app
-COPY ./target/VectorServiceOPE-0.1.0-jar-with-dependencies.jar /usr/app/
+COPY --from=builder ./VS/target/VectorServiceOPE-0.1.0-jar-with-dependencies.jar .
 
 # The listening port
 EXPOSE 2060

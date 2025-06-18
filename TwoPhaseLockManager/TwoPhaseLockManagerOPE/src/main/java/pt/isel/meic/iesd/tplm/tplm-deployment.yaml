@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tplm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tplm
+  template:
+    metadata:
+      labels:
+        app: tplm
+    spec:
+      containers:
+        - name: tplm
+          image: tplm:latest
+          ports:
+            - containerPort: 3000
+          command: ["java", "-jar", "/usr/app/TwoPhaseLockManagerOPE-1.0-SNAPSHOT-jar-with-dependencies.jar", "rabbitmq", "5672"]
+          env:
+            - name: RNM_HOSTNAME
+              value: "rnm"

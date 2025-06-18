@@ -1,13 +1,14 @@
-package pt.isel.meic.iesd.rnm;
+package pt.isel.meic.iesd.rnm.cl;
 
 import jakarta.jws.WebService;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerCl;
 
 import java.nio.charset.StandardCharsets;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.rnm.IReliableNodeManagerCl")
-public class ReliableNodeManagerCl implements IReliableNodeManagerCl{
+public class ReliableNodeManagerCl implements IReliableNodeManagerCl {
 
     private final ZooKeeper zk;
     public ReliableNodeManagerCl(ZooKeeper zk) {

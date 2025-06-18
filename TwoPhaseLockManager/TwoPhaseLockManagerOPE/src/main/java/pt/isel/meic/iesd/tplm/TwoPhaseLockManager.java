@@ -28,7 +28,6 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
     private final IReliableNodeManagerTPLM rnm;
     private final Channel rabbitChannel;
 
-
     /**
      * Constructs a TwoPhaseLockManager instance, setting up configuration and RabbitMQ connection.
      *
@@ -62,7 +61,6 @@ public class TwoPhaseLockManager implements ITwoPhaseLockManager {
             LOGGER.error("Failed to setup connection to rabbitMQ broker", e);
             throw new RuntimeException(e);
         }
-
         return rabbitChannel;
     }
 

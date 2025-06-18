@@ -2,11 +2,11 @@
 
 set -e  # Para parar o script em caso de erro
 
-echo "🔧 Criando rede (se necessário)..."
+echo "Criando rede (se necessário)..."
 podman network inspect my_custom_network >/dev/null 2>&1 || \
   podman network create my_custom_network
 
-echo "🚀 Iniciando Zookeeper..."
+echo "Iniciando Zookeeper..."
 podman run -d \
   --name zookeeper \
   --network my_custom_network \
@@ -14,7 +14,7 @@ podman run -d \
   -v zookeeper_data:/data \
   docker.io/library/zookeeper:latest
 
-echo "🚀 Iniciando RabbitMQ..."
+echo "Iniciando RabbitMQ..."
 podman run -d \
   --name rabbitmq \
   --network my_custom_network \
@@ -27,38 +27,38 @@ podman run -d \
 # Aguarda alguns segundos para garantir que ZK e Rabbit estão prontos
 sleep 5
 
-echo "🛠️ Build RNM..."
+echo "Build RNM..."
 podman build -t rnm ./ReliableNodeManager/ReliableNodeManagerOPE
 
-echo "🚀 Iniciando RNM..."
+echo "Iniciando RNM..."
 podman run -d \
   --name rnm \
   -e ZOOKEEPER_HOST=zookeeper:2181 \
   --network my_custom_network \
   rnm
 
-echo "🛠️ Build TPLM..."
+echo "Build TPLM..."
 podman build -t tplm ./TwoPhaseLockManager/TwoPhaseLockManagerOPE
 
-echo "🚀 Iniciando TPLM..."
+echo "Iniciando TPLM..."
 podman run -d \
   --name tplm \
   --network my_custom_network \
   tplm
 
-echo "🛠️ Build TM..."
+echo "Build TM..."
 podman build -t tm ./TransactionManager/TransactionManagerOPE
 
-echo "🚀 Iniciando TM..."
+echo "Iniciando TM..."
 podman run -d \
   --name tm \
   --network my_custom_network \
   tm
 
-echo "🛠️ Build VectorService..."
+echo "Build VectorService..."
 podman build -t vs ./VectorService/VectorServiceOPE
 
-echo "🚀 Iniciando Vector 1..."
+echo "Iniciando Vector 1..."
 podman run -d \
   --name vector1 \
   --network my_custom_network \
@@ -66,7 +66,7 @@ podman run -d \
   vs \
   1 0.0.0.0 2060
 
-echo "🚀 Iniciando Vector 2..."
+echo "Iniciando Vector 2..."
 podman run -d \
   --name vector2 \
   --network my_custom_network \
@@ -74,4 +74,4 @@ podman run -d \
   vs \
   2 0.0.0.0 2060
 
-echo "✅ Todos os serviços foram iniciados com sucesso!"
+echo "Todos os serviços foram iniciados com sucesso!"

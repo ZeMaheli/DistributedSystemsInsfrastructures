@@ -2,6 +2,9 @@ package pt.isel.meic.iesd.rnm;
 
 import jakarta.xml.ws.Endpoint;
 import org.apache.zookeeper.ZooKeeper;
+import pt.isel.meic.iesd.rnm.cl.ReliableNodeManagerCl;
+import pt.isel.meic.iesd.rnm.rm.ReliableNodeManagerRM;
+import pt.isel.meic.iesd.rnm.tplm.ReliableNodeManagerTPLM;
 
 public class SiteServer {
     static final String HOSTNAME = "0.0.0.0";

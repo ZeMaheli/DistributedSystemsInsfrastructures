@@ -1,4 +1,4 @@
-package pt.isel.meic.iesd.rnm;
+package pt.isel.meic.iesd.rnm.tplm;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +7,8 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerTPLM;
+import pt.isel.meic.iesd.rnm.Lock;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +19,7 @@ import java.util.Properties;
 import static java.util.Collections.emptyList;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.rnm.IReliableNodeManagerTPLM")
-public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM{
+public class ReliableNodeManagerTPLM implements IReliableNodeManagerTPLM {
     private final ZooKeeper zooKeeper;
     private String basePath;
     private String locksHeldPath;

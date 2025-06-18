@@ -5,6 +5,7 @@ import org.apache.zookeeper.ZooKeeper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import pt.isel.meic.iesd.rnm.tplm.ReliableNodeManagerTPLM;
 
 import java.util.List;
 

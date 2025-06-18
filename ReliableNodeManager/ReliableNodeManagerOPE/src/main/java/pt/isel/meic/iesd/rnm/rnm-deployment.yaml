@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rnm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rnm
+  template:
+    metadata:
+      labels:
+        app: rnm
+    spec:
+      containers:
+        - name: rnm
+          image: rnm:latest
+          ports:
+            - containerPort: 2050
+              name: tplm
+            - containerPort: 2051
+              name: rm
+            - containerPort: 2052
+              name: cl

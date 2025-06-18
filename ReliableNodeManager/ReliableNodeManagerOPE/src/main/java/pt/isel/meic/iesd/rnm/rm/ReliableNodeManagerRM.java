@@ -1,13 +1,14 @@
-package pt.isel.meic.iesd.rnm;
+package pt.isel.meic.iesd.rnm.rm;
 
 import jakarta.jws.WebService;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
+import pt.isel.meic.iesd.rnm.IReliableNodeManagerRM;
 
 @WebService(endpointInterface = "pt.isel.meic.iesd.rnm.IReliableNodeManagerRM")
-public class ReliableNodeManagerRM implements IReliableNodeManagerRM{
+public class ReliableNodeManagerRM implements IReliableNodeManagerRM {
     private final ZooKeeper zk;
     public ReliableNodeManagerRM(ZooKeeper zk) {
         this.zk = zk;

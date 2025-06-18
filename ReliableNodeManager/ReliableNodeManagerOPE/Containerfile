@@ -1,11 +1,18 @@
-# obtain the base Linux image with Java runtime
+# Stage 1: Build the Java project with Maven
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
+WORKDIR /RNM
+COPY . .
+RUN mvn clean package
+
+# Stage 2: Create a minimal runtime image
 FROM eclipse-temurin:21-jre-jammy
+WORKDIR /usr/app
 
-# Place java executable at /usr/app
-COPY ./target/ReliableNodeManagerOPE-0.1.0-jar-with-dependencies.jar /usr/app/
+# Copy the built JAR from the builder stage
+COPY --from=builder /RNM/target/ReliableNodeManagerOPE-0.1.0-jar-with-dependencies.jar .
 
-# The listening port
+# Expose ports for communication
 EXPOSE 2050 2051 2052
 
-# Starts the ReliableNodeManager service
-CMD ["java","-jar","/usr/app/ReliableNodeManagerOPE-0.1.0-jar-with-dependencies.jar", "0.0.0.0", "2050", "2051", "2052"]]
+# Start the ReliableNodeManager service
+CMD ["java", "-jar", "ReliableNodeManagerOPE-0.1.0-jar-with-dependencies.jar", "0.0.0.0", "2050", "2051", "2052"]

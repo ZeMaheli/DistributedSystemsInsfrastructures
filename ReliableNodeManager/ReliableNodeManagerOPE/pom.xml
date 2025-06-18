@@ -18,10 +18,20 @@
         <module.type>SERVICE.OPE ::</module.type>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ReliableNodeManagerMainClass>pt.isel.meic.iesd.rnm.SiteServer</ReliableNodeManagerMainClass>
-
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-kubernetes</artifactId>
+            <version>3.23.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+            <version>3.23.3</version>
+        </dependency>
+
         <dependency>
             <groupId>pt.isel.meic.iesd.rnm</groupId>
             <artifactId>ReliableNodeManagerAPIM</artifactId>
